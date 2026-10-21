@@ -292,13 +292,15 @@ def cmd_doctor(args):
     template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
     ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 271)")
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 277)")
     print(f"  • Configured Subagents     : {agent_count} (Expected: 22)")
     print(f"  • Workflow Recipes         : {recipe_count} (Expected: 9)")
     print(f"  • Production Templates     : {template_count} (Expected: 18)")
     print(f"  • Reference Guides         : {ref_count} (Expected: 6)")
+    has_skills_json = (KIT_DIR / "skills.json").exists()
+    print(f"  • Universal skills.json    : {'✅ PRESENT' if has_skills_json else '⚠️ MISSING'}")
 
-    if skill_count >= 270 and agent_count == 22 and recipe_count >= 9:
+    if skill_count >= 275 and agent_count == 22 and recipe_count >= 9:
         print("\n🎉 Agents-kit status: 100% HEALTHY & READY TO USE!\n")
     else:
         print("\n⚠️ Agents-kit status: Some components missing.\n")
@@ -400,6 +402,39 @@ def cmd_reference(args):
             print("\n... [Output truncated. View full file at: " + str(target) + "]")
         print()
 
+def cmd_export_skills_json(args):
+    import json
+    out_path = Path(args.output).resolve() if args.output else KIT_DIR / "skills.json"
+    skills_list = []
+    for sf in sorted(SKILLS_DIR.glob('**/SKILL.md')):
+        name = sf.parent.name
+        cat = sf.parent.parent.name
+        content = sf.read_text(encoding='utf-8', errors='ignore')
+        desc = ""
+        for line in content.splitlines()[:10]:
+            if line.startswith("description:"):
+                desc = line.replace("description:", "").strip().strip('"').strip("'")
+                break
+        skills_list.append({
+            "name": name,
+            "description": desc or f"Guidelines for {name}",
+            "category": cat,
+            "path": str(sf.relative_to(KIT_DIR))
+        })
+    manifest = {
+        "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
+        "name": "agents-kit",
+        "version": "4.2.0",
+        "description": "Universal multi-stack engineering suite with 277+ production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
+        "author": "Hien",
+        "repository": "https://github.com/hienpham0344/Agent-kit",
+        "total_skills": len(skills_list),
+        "skills": skills_list
+    }
+    with open(out_path, 'w', encoding='utf-8') as f:
+        json.dump(manifest, f, indent=2, ensure_ascii=False)
+    print(f"✅ Exported {len(skills_list)} skills to universal manifest: {out_path}")
+
 def main():
     parser = argparse.ArgumentParser(prog="agents-kit", description="Universal AI Agent Kit Manager")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -449,6 +484,10 @@ def main():
     p_ref = subparsers.add_parser("reference", help="View reference guides, cheat sheets, and cookbooks")
     p_ref.add_argument("topic", nargs="?", default="", help="Topic keyword or filename")
 
+    # export-skills-json
+    p_exp = subparsers.add_parser("export-skills-json", help="Export universal skills.json manifest for Vercel/Anthropic")
+    p_exp.add_argument("-o", "--output", help="Output path for skills.json")
+
     args = parser.parse_args()
     if args.command == "list":
         cmd_list(args)
@@ -472,6 +511,8 @@ def main():
         cmd_test(args)
     elif args.command == "reference":
         cmd_reference(args)
+    elif args.command == "export-skills-json":
+        cmd_export_skills_json(args)
 
 if __name__ == "__main__":
     main()

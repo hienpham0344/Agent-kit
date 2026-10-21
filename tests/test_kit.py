@@ -20,7 +20,7 @@ class TestAgentsKit(unittest.TestCase):
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
         skill_files = list(SKILLS_DIR.glob("**/SKILL.md"))
-        self.assertGreaterEqual(len(skill_files), 270, f"Expected at least 270 skills, found {len(skill_files)}")
+        self.assertGreaterEqual(len(skill_files), 275, f"Expected at least 275 skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -90,6 +90,16 @@ class TestAgentsKit(unittest.TestCase):
         self.assertGreaterEqual(len(ref_files), 6, f"Expected at least 6 reference guides, found {len(ref_files)}")
         for r in ref_files:
             self.assertGreater(r.stat().st_size, 400, f"{r.name} is too short or empty")
+
+    def test_skills_json_manifest(self):
+        """Ensure universal skills.json manifest exists and indexes all skills."""
+        manifest_path = KIT_DIR / "skills.json"
+        self.assertTrue(manifest_path.exists(), "skills.json manifest is missing")
+        import json
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        self.assertIn("skills", data)
+        self.assertGreaterEqual(len(data["skills"]), 275)
 
 if __name__ == "__main__":
     unittest.main()
