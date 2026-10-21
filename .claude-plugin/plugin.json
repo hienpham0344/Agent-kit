@@ -1,7 +1,7 @@
 {
   "name": "agents-kit",
-  "version": "3.0.0",
-  "description": "Production-grade multi-stack engineering suite with 153+ skills, 17 specialized subagents, 9 SDLC workflows, and 18 templates.",
+  "version": "4.0.0",
+  "description": "Production-grade multi-stack engineering suite with 253+ skills, 22 specialized subagents, built-in CLI tools, MCP servers, 9 SDLC workflows, and 18 templates.",
   "author": "Hien",
-  "keywords": ["skills", "agents", "antigravity", "claude-code", "cursor", "subagents", "solid", "tdd", "devops", "ai-llm", "rag", "k6", "cloud-infra", "expo", "sre"]
+  "keywords": ["skills", "agents", "antigravity", "claude-code", "cursor", "subagents", "solid", "tdd", "devops", "ai-llm", "mcp", "tools", "data-science", "webgl", "security-redteam", "rust-systems", "aws-gcp-azure"]
 }
