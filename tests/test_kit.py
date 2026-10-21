@@ -20,7 +20,7 @@ class TestAgentsKit(unittest.TestCase):
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
         skill_files = list(SKILLS_DIR.glob("**/SKILL.md"))
-        self.assertGreaterEqual(len(skill_files), 250, f"Expected at least 250 skills, found {len(skill_files)}")
+        self.assertGreaterEqual(len(skill_files), 270, f"Expected at least 270 skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -83,6 +83,13 @@ class TestAgentsKit(unittest.TestCase):
         self.assertTrue((RULES_DIR / "AGENTS.md").exists())
         self.assertTrue((RULES_DIR / "copilot-instructions.md").exists())
         self.assertTrue((AGENTS_DIR / "agents.toml").exists())
+
+    def test_reference_guides(self):
+        """Ensure reference guides exist and contain rich documentation."""
+        ref_files = list((KIT_DIR / "references").glob("**/*.md"))
+        self.assertGreaterEqual(len(ref_files), 6, f"Expected at least 6 reference guides, found {len(ref_files)}")
+        for r in ref_files:
+            self.assertGreater(r.stat().st_size, 400, f"{r.name} is too short or empty")
 
 if __name__ == "__main__":
     unittest.main()

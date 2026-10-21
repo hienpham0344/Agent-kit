@@ -39,6 +39,7 @@ PRESETS = {
         "lowlevel-systems",
         "cloud-aws-gcp-azure",
         "developer-productivity",
+        "frontend-mastery",
     ],
     "web": [
         "planning-grilling",
@@ -46,6 +47,8 @@ PRESETS = {
         "design-uiux",
         "documents-media",
         "ops-guardrails",
+        "web-advanced-graphics",
+        "frontend-mastery",
     ],
     "backend": [
         "planning-grilling",
@@ -279,13 +282,15 @@ def cmd_doctor(args):
     agent_count = len(list((AGENTS_DIR / "profiles").glob("*.agent.md")))
     recipe_count = len(list((WORKFLOWS_DIR / "recipes").glob("*.md")))
     template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
+    ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 253)")
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 271)")
     print(f"  • Configured Subagents     : {agent_count} (Expected: 22)")
     print(f"  • Workflow Recipes         : {recipe_count} (Expected: 9)")
     print(f"  • Production Templates     : {template_count} (Expected: 18)")
+    print(f"  • Reference Guides         : {ref_count} (Expected: 6)")
 
-    if skill_count >= 250 and agent_count == 22 and recipe_count >= 9:
+    if skill_count >= 270 and agent_count == 22 and recipe_count >= 9:
         print("\n🎉 Agents-kit status: 100% HEALTHY & READY TO USE!\n")
     else:
         print("\n⚠️ Agents-kit status: Some components missing.\n")
@@ -355,6 +360,38 @@ def cmd_test(args):
     print("\n🧪 Running Agents-kit Automated Test Suite...")
     subprocess.run([sys.executable, str(KIT_DIR / "tests" / "test_kit.py")])
 
+def cmd_reference(args):
+    ref_dir = KIT_DIR / "references"
+    if not ref_dir.exists():
+        print("❌ No references directory found.")
+        return
+
+    files = list(ref_dir.glob("**/*.md"))
+    if not args.topic:
+        print("\n📚 AVAILABLE REFERENCE GUIDES & CHEAT SHEETS")
+        print("=" * 65)
+        for f in sorted(files):
+            rel = f.relative_to(ref_dir)
+            title = ""
+            for line in f.read_text(encoding="utf-8", errors="ignore").splitlines()[:5]:
+                if line.startswith("# "):
+                    title = line.replace("# ", "").strip()
+                    break
+            print(f"  • {str(rel):<42} : {title}")
+        print("\n💡 Usage: agents-kit reference <topic_or_filename>\n")
+    else:
+        topic = args.topic.lower()
+        matched = [f for f in files if topic in f.stem.lower() or topic in f.name.lower()]
+        if not matched:
+            print(f"❌ No reference matching '{args.topic}' found.")
+            return
+        target = matched[0]
+        print(f"\n📖 Viewing Reference: {target.name}\n" + "=" * 65)
+        print(target.read_text(encoding="utf-8", errors="ignore")[:2500])
+        if target.stat().st_size > 2500:
+            print("\n... [Output truncated. View full file at: " + str(target) + "]")
+        print()
+
 def main():
     parser = argparse.ArgumentParser(prog="agents-kit", description="Universal AI Agent Kit Manager")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -400,6 +437,10 @@ def main():
     # test
     subparsers.add_parser("test", help="Run automated test suite")
 
+    # reference
+    p_ref = subparsers.add_parser("reference", help="View reference guides, cheat sheets, and cookbooks")
+    p_ref.add_argument("topic", nargs="?", default="", help="Topic keyword or filename")
+
     args = parser.parse_args()
     if args.command == "list":
         cmd_list(args)
@@ -421,6 +462,8 @@ def main():
         cmd_mcp(args)
     elif args.command == "test":
         cmd_test(args)
+    elif args.command == "reference":
+        cmd_reference(args)
 
 if __name__ == "__main__":
     main()

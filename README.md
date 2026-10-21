@@ -5,15 +5,16 @@
 
 **Built for Google Antigravity, Claude Code, Cursor, Windsurf, and GitHub Copilot.**
 
-[![Version](https://img.shields.io/badge/Version-4.0.0-blue.svg?style=flat-square)](https://github.com/hienpham0344/Agent-kit)
-[![Skills](https://img.shields.io/badge/Skills-253%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
-[![Domains](https://img.shields.io/badge/Domains-20%20Specialized-blueviolet.svg?style=flat-square)](skills/)
+[![Version](https://img.shields.io/badge/Version-4.1.0-blue.svg?style=flat-square)](https://github.com/hienpham0344/Agent-kit)
+[![Skills](https://img.shields.io/badge/Skills-271%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
+[![Domains](https://img.shields.io/badge/Domains-21%20Specialized-blueviolet.svg?style=flat-square)](skills/)
 [![Subagents](https://img.shields.io/badge/Subagents-22%20Configured%20Personas-purple.svg?style=flat-square)](agents/)
+[![References](https://img.shields.io/badge/References-6%20Cookbooks-ff69b4.svg?style=flat-square)](references/)
 [![Workflows](https://img.shields.io/badge/Workflows-9%20Runbooks-orange.svg?style=flat-square)](workflows/recipes/)
 [![Templates](https://img.shields.io/badge/Templates-18%20Production%20Templates-yellowgreen.svg?style=flat-square)](workflows/templates/)
 [![MCP Servers](https://img.shields.io/badge/MCP%20Servers-10%20Integrated-0052cc.svg?style=flat-square)](mcp/)
 [![Token Efficiency](https://img.shields.io/badge/Token%20Savings-Up%20to%2098%25-brightgreen.svg?style=flat-square)](tools/token_estimator.py)
-[![Test Suite](https://img.shields.io/badge/Tests-5%2F5%20PASS-brightgreen.svg?style=flat-square)](tests/)
+[![Test Suite](https://img.shields.io/badge/Tests-6%2F6%20PASS-brightgreen.svg?style=flat-square)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 <br/>
@@ -188,13 +189,17 @@ agents-kit mcp verify context-mode
 # 4. Scaffold a new production skill
 agents-kit create-skill redis-sentinel-failover --domain data-streaming --description "Redis Sentinel HA"
 
-# 5. Run automated test suite
+# 5. View reference guides, cheat sheets & cookbooks
+agents-kit reference
+agents-kit reference css
+
+# 6. Run automated test suite
 agents-kit test
 
-# 6. Analyze token consumption on a file or prompt
+# 7. Analyze token consumption on a file or prompt
 python3 tools/token_estimator.py path/to/file.py
 
-# 7. Scan Python AST complexity
+# 8. Scan Python AST complexity
 python3 tools/ast_analyzer.py path/to/source/
 ```
 
@@ -575,6 +580,29 @@ Pre-configured Model Context Protocol manifests ready for Antigravity, Claude Co
 - `gnupg-commit-signing-keys`: GPG and SSH cryptographic commit and tag signing.
 </details>
 
+<details>
+<summary><b>21. Advanced Frontend Mastery (18 Skills)</b> — <code>skills/frontend-mastery/</code></summary>
+
+- `react-19-actions-hooks`: React 19 `use()`, `useActionState`, `useOptimistic`, and form Server Actions.
+- `nextjs-app-router-deep-dive`: Next.js 15 parallel routes (`@slot`), modal interception, streaming Suspense.
+- `tanstack-query-v5-caching`: Query Key Factory, optimistic cache updates, infinite scroll, SSR hydration.
+- `zustand-state-management`: Slices pattern, persist middleware, transient updates, selectors.
+- `radix-ui-headless-primitives`: Unstyled accessible primitives, focus trapping, slot (`asChild`) composition.
+- `react-hook-form-zod`: Type-safe form validation, field arrays, and Server Actions integration.
+- `css-container-queries-subgrid`: Component-driven responsive design with `@container` and CSS Grid `subgrid`.
+- `fluid-typography-spacing`: Mathematical scaling with `clamp()`, modular typography scales, viewports `dvh`/`cqw`.
+- `view-transitions-api`: Native browser page transitions, shared element transitions, cross-fade animations.
+- `drag-and-drop-dndkit`: Accessible drag-and-drop sorting, collision algorithms, virtual lists integration.
+- `web-accessibility-wcag-aria`: ARIA live regions, keyboard traps, screen reader testing, high-contrast mode.
+- `frontend-bundle-optimization`: Tree-shaking, dynamic imports, polyfill elimination, bundle visualizer.
+- `inp-responsiveness-profiling`: Interaction to Next Paint (INP) debugging, long tasks breakdown, `scheduler.yield()`.
+- `storybook-component-driven-dev`: Storybook 8, interaction testing with `@storybook/test`, visual regression.
+- `vitest-react-testing-library`: User-centric unit testing, user-event, MSW mock handlers, snapshot stability.
+- `astro-island-architecture`: Partial hydration, multi-framework islands (React + Svelte), zero-JS baselines.
+- `svelte-5-runes-reactivity`: Modern Svelte 5 `$state`, `$derived`, `$effect`, and snippet architecture.
+- `vue-3-composition-pinia`: Vue 3 `<script setup>`, composables, Pinia stores, and template refs.
+</details>
+
 ---
 
 ## 🛡️ Token Hygiene Protocol & Context Mode Standards
@@ -607,8 +635,8 @@ agents-kit test
 ```
 
 ```
-Ran 5 tests in 0.058s
-OK (253 skills validated, 22 subagents verified, 9 recipes checked, 18 templates confirmed)
+Ran 6 tests in 0.159s
+OK (271 skills validated, 22 subagents verified, 9 recipes checked, 18 templates confirmed, 6 reference guides checked)
 ```
 
 ---

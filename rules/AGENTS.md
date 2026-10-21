@@ -46,5 +46,16 @@ flowchart LR
 
 ---
 
-## 3. 20 Curated Skill Domains (253 Skills Total)
-Includes Planning, Clean Architecture, TDD, Design-Taste, Security Threat, Full Stacks, Ops Guardrails, Documents & Media, AI/LLM, Cloud & Serverless, Testing & Concurrency, Mobile, Streaming Data, SRE, Data/ML Analytics, 3D Web & Desktop, Offensive Red Team, Low-Level Systems, Enterprise AWS/GCP/Azure, and Developer Productivity.
+## 3. 21 Curated Skill Domains (271 Skills Total)
+Includes Planning, Clean Architecture, TDD, Design-Taste, Security Threat, Full Stacks, Ops Guardrails, Documents & Media, AI/LLM, Cloud & Serverless, Testing & Concurrency, Mobile, Streaming Data, SRE, Data/ML Analytics, 3D Web & Desktop, Offensive Red Team, Low-Level Systems, Enterprise AWS/GCP/Azure, Developer Productivity, and Advanced Frontend Mastery.
+
+---
+
+## 4. Central References & Cookbooks Hub (`references/`)
+Provides authoritative technical cheat sheets accessible via `agents-kit reference <topic>`:
+- `references/frontend/modern-css-cheat-sheet.md` (Subgrid, Container Queries, clamp(), dvh/svh/lvh, @layer)
+- `references/frontend/react-19-and-nextjs15-reference.md` (use() hook, useActionState, useOptimistic, slots)
+- `references/frontend/tanstack-query-v5-cookbook.md` (Query key factory, optimistic mutations, SSR hydration)
+- `references/frontend/wcag-accessibility-audit-checklist.md` (WCAG 2.2 AA audit checklist & ARIA 1.2)
+- `references/frontend/design-tokens-and-color-palettes.md` (Oklch color scales, 8pt spacing, shadows)
+- `references/frontend/state-management-matrix.md` (Zustand, Jotai, React Context, Signals decision tree)
