@@ -20,7 +20,7 @@ class TestAgentsKit(unittest.TestCase):
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
         skill_files = list(SKILLS_DIR.glob("**/SKILL.md"))
-        self.assertGreaterEqual(len(skill_files), 150, f"Expected at least 150 skills, found {len(skill_files)}")
+        self.assertGreaterEqual(len(skill_files), 250, f"Expected at least 250 skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -35,9 +35,9 @@ class TestAgentsKit(unittest.TestCase):
             self.assertIn("description:", frontmatter, f"{rel_path} missing 'description:' in frontmatter")
 
     def test_agent_profiles(self):
-        """Ensure all 17 agent profiles exist and are valid markdown files."""
+        """Ensure all 22 agent profiles exist and are valid markdown files."""
         profiles = list((AGENTS_DIR / "profiles").glob("*.agent.md"))
-        self.assertEqual(len(profiles), 17, f"Expected 17 agent profiles, found {len(profiles)}")
+        self.assertEqual(len(profiles), 22, f"Expected 22 agent profiles, found {len(profiles)}")
 
         for p in profiles:
             with open(p, "r", encoding="utf-8") as f:
