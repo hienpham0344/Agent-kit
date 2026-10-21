@@ -435,6 +435,101 @@ def cmd_export_skills_json(args):
         json.dump(manifest, f, indent=2, ensure_ascii=False)
     print(f"✅ Exported {len(skills_list)} skills to universal manifest: {out_path}")
 
+def cmd_add(args):
+    """
+    Import skills from an external GitHub repository or local path,
+    compatible with vercel-labs/skills and community repositories.
+    Usage: agents-kit add <repo> [--target <dir>] [--skill <name>]
+    Example: agents-kit add supabase/agent-skills
+    """
+    import tempfile
+    import shutil
+    import subprocess
+    
+    source = args.source.strip()
+    target_project = Path(args.target).resolve()
+    
+    # Determine git clone URL
+    if source.startswith("https://") or source.startswith("git@"):
+        clone_url = source
+    elif "/" in source and not os.path.exists(source):
+        clone_url = f"https://github.com/{source}.git"
+    elif os.path.exists(source):
+        clone_url = None
+    else:
+        clone_url = f"https://github.com/{source}.git"
+
+    print(f"\n📦 Fetching skills from: {source}...")
+    temp_dir = tempfile.mkdtemp(prefix="agents_kit_add_")
+    
+    try:
+        if clone_url:
+            res = subprocess.run(
+                ["git", "clone", "--depth", "1", clone_url, temp_dir],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            if res.returncode != 0:
+                print(f"❌ Failed to clone repository: {clone_url}")
+                print(res.stderr.strip())
+                return
+            src_root = Path(temp_dir)
+        else:
+            src_root = Path(source).resolve()
+
+        candidate_skills = []
+        for sm in src_root.glob("**/SKILL.md"):
+            if "node_modules" in sm.parts or ".git" in sm.parts:
+                continue
+            candidate_skills.append(sm)
+
+        if not candidate_skills:
+            print(f"⚠️ No SKILL.md files found in {source}.")
+            return
+
+        dest_skills_dir = target_project / ".agents" / "skills"
+        if not (target_project / ".agents").exists() and (target_project / "skills").is_dir():
+            dest_skills_dir = target_project / "skills" / "external"
+        
+        dest_skills_dir.mkdir(parents=True, exist_ok=True)
+
+        added = []
+        filter_name = args.skill.lower() if args.skill else None
+
+        for sm in candidate_skills:
+            skill_folder = sm.parent
+            skill_name = skill_folder.name
+            
+            content = sm.read_text(encoding="utf-8", errors="ignore")
+            for line in content.splitlines()[:10]:
+                if line.startswith("name:"):
+                    extracted_name = line.replace("name:", "").strip().strip('"').strip("'")
+                    if extracted_name:
+                        skill_name = extracted_name
+                    break
+
+            if filter_name and filter_name != skill_name.lower():
+                continue
+
+            target_folder = dest_skills_dir / skill_name
+            if target_folder.exists():
+                shutil.rmtree(target_folder)
+            shutil.copytree(skill_folder, target_folder, dirs_exist_ok=True)
+            added.append(skill_name)
+
+        if not added:
+            print(f"⚠️ No matching skills found matching filter '{args.skill}'.")
+            return
+
+        print(f"\n✅ Successfully imported {len(added)} skill(s) into: {dest_skills_dir}")
+        for s in added:
+            print(f"   • {s}")
+        print("\n💡 Tip: Run 'agents-kit list' or your AI assistant to use the imported skills.\n")
+
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
 def main():
     parser = argparse.ArgumentParser(prog="agents-kit", description="Universal AI Agent Kit Manager")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -488,6 +583,12 @@ def main():
     p_exp = subparsers.add_parser("export-skills-json", help="Export universal skills.json manifest for Vercel/Anthropic")
     p_exp.add_argument("-o", "--output", help="Output path for skills.json")
 
+    # add (compatible with vercel-labs/skills)
+    p_add = subparsers.add_parser("add", help="Import skills from a GitHub repository or community source")
+    p_add.add_argument("source", help="GitHub repo (e.g., supabase/agent-skills) or Git URL")
+    p_add.add_argument("--target", default=".", help="Target project root directory (default: current dir)")
+    p_add.add_argument("--skill", default="", help="Specific skill name to import (optional)")
+
     args = parser.parse_args()
     if args.command == "list":
         cmd_list(args)
@@ -513,6 +614,8 @@ def main():
         cmd_reference(args)
     elif args.command == "export-skills-json":
         cmd_export_skills_json(args)
+    elif args.command == "add":
+        cmd_add(args)
 
 if __name__ == "__main__":
     main()
