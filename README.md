@@ -5,16 +5,17 @@
 
 **Built for Google Antigravity, Claude Code, Cursor, Windsurf, and GitHub Copilot.**
 
-[![Version](https://img.shields.io/badge/Version-4.1.0-blue.svg?style=flat-square)](https://github.com/hienpham0344/Agent-kit)
-[![Skills](https://img.shields.io/badge/Skills-271%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
+[![Version](https://img.shields.io/badge/Version-4.2.0-blue.svg?style=flat-square)](https://github.com/hienpham0344/Agent-kit)
+[![Skills](https://img.shields.io/badge/Skills-277%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
 [![Domains](https://img.shields.io/badge/Domains-21%20Specialized-blueviolet.svg?style=flat-square)](skills/)
 [![Subagents](https://img.shields.io/badge/Subagents-22%20Configured%20Personas-purple.svg?style=flat-square)](agents/)
+[![Universal Spec](https://img.shields.io/badge/skills.json-Vercel%20%26%20Anthropic-black.svg?style=flat-square)](skills.json)
 [![References](https://img.shields.io/badge/References-6%20Cookbooks-ff69b4.svg?style=flat-square)](references/)
 [![Workflows](https://img.shields.io/badge/Workflows-9%20Runbooks-orange.svg?style=flat-square)](workflows/recipes/)
 [![Templates](https://img.shields.io/badge/Templates-18%20Production%20Templates-yellowgreen.svg?style=flat-square)](workflows/templates/)
 [![MCP Servers](https://img.shields.io/badge/MCP%20Servers-10%20Integrated-0052cc.svg?style=flat-square)](mcp/)
 [![Token Efficiency](https://img.shields.io/badge/Token%20Savings-Up%20to%2098%25-brightgreen.svg?style=flat-square)](tools/token_estimator.py)
-[![Test Suite](https://img.shields.io/badge/Tests-6%2F6%20PASS-brightgreen.svg?style=flat-square)](tests/)
+[![Test Suite](https://img.shields.io/badge/Tests-7%2F7%20PASS-brightgreen.svg?style=flat-square)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 <br/>
@@ -25,7 +26,7 @@
   <a href="#-the-22-specialist-subagent-team"><b>Subagents</b></a> •
   <a href="#-built-in-developer-tools--cli-suite"><b>Tools & CLI</b></a> •
   <a href="#-production-mcp-servers-ecosystem"><b>MCP Servers</b></a> •
-  <a href="#-the-20-curated-skill-domains-253-skills"><b>253 Skills Catalog</b></a> •
+  <a href="#-the-21-curated-skill-domains-277-skills"><b>277 Skills Catalog</b></a> •
   <a href="#-token-hygiene-protocol"><b>Token Protocol</b></a>
 </p>
 
@@ -225,7 +226,7 @@ Pre-configured Model Context Protocol manifests ready for Antigravity, Claude Co
 
 ---
 
-## 📚 The 20 Curated Skill Domains (253 Skills Total)
+## 📚 The 21 Curated Skill Domains (277 Skills Total)
 
 <details>
 <summary><b>1. Planning, Grilling & SRS (10 Skills)</b> — <code>skills/planning-grilling/</code></summary>
@@ -581,8 +582,10 @@ Pre-configured Model Context Protocol manifests ready for Antigravity, Claude Co
 </details>
 
 <details>
-<summary><b>21. Advanced Frontend Mastery (18 Skills)</b> — <code>skills/frontend-mastery/</code></summary>
+<summary><b>21. Advanced Frontend Mastery (20 Skills)</b> — <code>skills/frontend-mastery/</code></summary>
 
+- `better-auth-passkeys-multitenant`: Better-Auth WebAuthn passkeys, TOTP 2FA, organization multi-tenancy.
+- `typescript-advanced-type-gymnastics`: Matt Pocock branded nominal types, infer, template literals, satisfies.
 - `react-19-actions-hooks`: React 19 `use()`, `useActionState`, `useOptimistic`, and form Server Actions.
 - `nextjs-app-router-deep-dive`: Next.js 15 parallel routes (`@slot`), modal interception, streaming Suspense.
 - `tanstack-query-v5-caching`: Query Key Factory, optimistic cache updates, infinite scroll, SSR hydration.
@@ -635,8 +638,8 @@ agents-kit test
 ```
 
 ```
-Ran 6 tests in 0.159s
-OK (271 skills validated, 22 subagents verified, 9 recipes checked, 18 templates confirmed, 6 reference guides checked)
+Ran 7 tests in 0.092s
+OK (277 skills validated, 22 subagents verified, 9 recipes checked, 18 templates confirmed, 6 reference guides checked, skills.json verified)
 ```
 
 ---

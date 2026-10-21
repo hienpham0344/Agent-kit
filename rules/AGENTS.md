@@ -46,7 +46,7 @@ flowchart LR
 
 ---
 
-## 3. 21 Curated Skill Domains (271 Skills Total)
+## 3. 21 Curated Skill Domains (277 Skills Total)
 Includes Planning, Clean Architecture, TDD, Design-Taste, Security Threat, Full Stacks, Ops Guardrails, Documents & Media, AI/LLM, Cloud & Serverless, Testing & Concurrency, Mobile, Streaming Data, SRE, Data/ML Analytics, 3D Web & Desktop, Offensive Red Team, Low-Level Systems, Enterprise AWS/GCP/Azure, Developer Productivity, and Advanced Frontend Mastery.
 
 ---
