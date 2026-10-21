@@ -14,3 +14,11 @@ Thumbs.db
 .idea/
 *.swp
 *~
+
+# Installed Agents-Kit artifacts in root
+/.agents/
+/.cursorrules
+/.github/
+/AGENTS.md
+/docs/
+
