@@ -27,6 +27,12 @@ PRESETS = {
         "stacks",
         "ops-guardrails",
         "documents-media",
+        "ai-llm",
+        "cloud-infra",
+        "testing-performance",
+        "mobile-crossplatform",
+        "data-streaming",
+        "sre-observability",
     ],
     "web": [
         "planning-grilling",
@@ -266,14 +272,14 @@ def cmd_doctor(args):
     skill_count = len(list(SKILLS_DIR.glob("**/SKILL.md")))
     agent_count = len(list((AGENTS_DIR / "profiles").glob("*.agent.md")))
     recipe_count = len(list((WORKFLOWS_DIR / "recipes").glob("*.md")))
-    template_count = len(list((WORKFLOWS_DIR / "templates").glob("*.md")))
+    template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 85)")
-    print(f"  • Configured Subagents     : {agent_count} (Expected: 12)")
-    print(f"  • Workflow Recipes         : {recipe_count} (Expected: 5)")
-    print(f"  • Production Templates     : {template_count} (Expected: 13)")
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 153)")
+    print(f"  • Configured Subagents     : {agent_count} (Expected: 17)")
+    print(f"  • Workflow Recipes         : {recipe_count} (Expected: 9)")
+    print(f"  • Production Templates     : {template_count} (Expected: 18)")
 
-    if skill_count >= 85 and agent_count == 12 and recipe_count == 5:
+    if skill_count >= 150 and agent_count == 17 and recipe_count >= 9:
         print("\n🎉 Agents-kit status: 100% HEALTHY & READY TO USE!\n")
     else:
         print("\n⚠️ Agents-kit status: Some components missing.\n")

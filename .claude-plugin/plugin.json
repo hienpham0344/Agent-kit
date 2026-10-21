@@ -1,7 +1,7 @@
 {
   "name": "agents-kit",
-  "version": "2.2.0",
-  "description": "Production-grade multi-stack engineering skills, subagents, and workflows for autonomous coding agents.",
+  "version": "3.0.0",
+  "description": "Production-grade multi-stack engineering suite with 153+ skills, 17 specialized subagents, 9 SDLC workflows, and 18 templates.",
   "author": "Hien",
-  "keywords": ["skills", "agents", "antigravity", "claude-code", "cursor", "subagents", "solid", "tdd", "devops"]
+  "keywords": ["skills", "agents", "antigravity", "claude-code", "cursor", "subagents", "solid", "tdd", "devops", "ai-llm", "rag", "k6", "cloud-infra", "expo", "sre"]
 }
