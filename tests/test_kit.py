@@ -47,9 +47,9 @@ class TestAgentsKit(unittest.TestCase):
             self.assertIn("description:", content, f"{p.name} missing description in frontmatter")
 
     def test_workflow_recipes(self):
-        """Ensure all 5 standard workflow recipes exist and are detailed."""
+        """Ensure all 9 standard workflow recipes exist and are detailed."""
         recipes = list((WORKFLOWS_DIR / "recipes").glob("*.md"))
-        self.assertEqual(len(recipes), 5, f"Expected 5 workflow recipes, found {len(recipes)}")
+        self.assertEqual(len(recipes), 9, f"Expected 9 workflow recipes, found {len(recipes)}")
         for r in recipes:
             self.assertGreater(r.stat().st_size, 500, f"{r.name} appears too small or empty")
 
@@ -67,7 +67,12 @@ class TestAgentsKit(unittest.TestCase):
             "GLOSSARY-TEMPLATE.md",
             "PLAN-TEMPLATE.md",
             "SPEC-TEMPLATE.md",
-            "TICKET-TEMPLATE.md"
+            "TICKET-TEMPLATE.md",
+            "terraform-main.tf",
+            "k6-load-script.js",
+            "eval-prompt-matrix.yaml",
+            "expo-app-config.json",
+            "kubernetes-deployment.yaml"
         ]
         for t in required_templates:
             tmpl_path = WORKFLOWS_DIR / "templates" / t
