@@ -304,6 +304,51 @@ def cmd_setup_env(args):
         print(f"🎉 Successfully added Agents-kit to {bashrc}!")
         print("💡 Run 'source ~/.bashrc' or open a new terminal to use 'agents-kit' directly from anywhere!")
 
+def cmd_search(args):
+    query = args.query.lower()
+    skill_files = list(SKILLS_DIR.glob("**/SKILL.md"))
+    matches = []
+
+    for sf in skill_files:
+        name = sf.parent.name
+        cat = sf.parent.parent.name
+        content = sf.read_text(encoding="utf-8", errors="ignore")
+        desc = ""
+        for line in content.splitlines()[:10]:
+            if line.startswith("description:"):
+                desc = line.replace("description:", "").strip()
+                break
+
+        if query in name.lower() or query in desc.lower() or query in cat.lower():
+            matches.append((cat, name, desc))
+
+    print(f"\n🔍 Search results for: '{args.query}' ({len(matches)} found)")
+    print("=" * 65)
+    for cat, name, desc in matches:
+        print(f"  • [{cat}] {name}")
+        if desc:
+            print(f"    {desc[:85]}...")
+    print()
+
+def cmd_create_skill(args):
+    from tools.skill_scaffolder import scaffold_skill
+    p = scaffold_skill(args.name, args.domain, args.description or f"Guidelines for {args.name}", KIT_DIR)
+    print(f"✅ Created skill at: {p}")
+
+def cmd_mcp(args):
+    import subprocess
+    cmd = [sys.executable, str(KIT_DIR / "tools" / "mcp_manager.py")]
+    if args.action:
+        cmd.append(args.action)
+    if args.name:
+        cmd.append(args.name)
+    subprocess.run(cmd)
+
+def cmd_test(args):
+    import subprocess
+    print("\n🧪 Running Agents-kit Automated Test Suite...")
+    subprocess.run([sys.executable, str(KIT_DIR / "tests" / "test_kit.py")])
+
 def main():
     parser = argparse.ArgumentParser(prog="agents-kit", description="Universal AI Agent Kit Manager")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -331,6 +376,24 @@ def main():
     # setup-env
     subparsers.add_parser("setup-env", help="Add agents-kit to your ~/.bashrc for global CLI access")
 
+    # search
+    p_search = subparsers.add_parser("search", help="Search skills and descriptions by keyword")
+    p_search.add_argument("query", help="Keyword or topic to search")
+
+    # create-skill
+    p_cskill = subparsers.add_parser("create-skill", help="Scaffold a new skill")
+    p_cskill.add_argument("name", help="Kebab-case skill name")
+    p_cskill.add_argument("--domain", default="engineering-core", help="Target domain")
+    p_cskill.add_argument("--description", default="", help="Skill description")
+
+    # mcp
+    p_mcp = subparsers.add_parser("mcp", help="Manage and verify MCP servers")
+    p_mcp.add_argument("action", nargs="?", default="list", choices=["list", "verify"], help="MCP action")
+    p_mcp.add_argument("name", nargs="?", default="", help="Server name for verify")
+
+    # test
+    subparsers.add_parser("test", help="Run automated test suite")
+
     args = parser.parse_args()
     if args.command == "list":
         cmd_list(args)
@@ -344,6 +407,14 @@ def main():
         cmd_audit(args)
     elif args.command == "setup-env":
         cmd_setup_env(args)
+    elif args.command == "search":
+        cmd_search(args)
+    elif args.command == "create-skill":
+        cmd_create_skill(args)
+    elif args.command == "mcp":
+        cmd_mcp(args)
+    elif args.command == "test":
+        cmd_test(args)
 
 if __name__ == "__main__":
     main()

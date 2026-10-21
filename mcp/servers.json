@@ -1,0 +1,65 @@
+{
+  "context-mode": {
+    "command": "context-mode",
+    "args": [],
+    "description": "FTS5 SQLite sandbox execution for token-saving search and bash piping.",
+    "category": "core-guardrails"
+  },
+  "filesystem": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/hien/Project"],
+    "description": "Secure scoped filesystem operations and file tree exploration.",
+    "category": "core-io"
+  },
+  "postgres": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-postgres", "postgresql://user:password@localhost:5432/dbname"],
+    "description": "Read-only schema inspection, table metadata, and query analysis.",
+    "category": "database"
+  },
+  "sqlite": {
+    "command": "uvx",
+    "args": ["mcp-server-sqlite", "--db-path", "./test.db"],
+    "description": "Local SQLite database querying and schema inspection.",
+    "category": "database"
+  },
+  "github": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-github"],
+    "env": { "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}" },
+    "description": "Interact with GitHub PRs, issues, commits, and repos.",
+    "category": "collaboration"
+  },
+  "puppeteer": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+    "description": "Headless browser automation, UI snapshots, and console log inspection.",
+    "category": "browser-testing"
+  },
+  "memory": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-memory"],
+    "description": "Persistent knowledge-graph memory across agent sessions.",
+    "category": "ai-memory"
+  },
+  "brave-search": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+    "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" },
+    "description": "Real-time web search and content retrieval.",
+    "category": "search"
+  },
+  "docker": {
+    "command": "uvx",
+    "args": ["mcp-server-docker"],
+    "description": "Container inspection, logs, and container execution management.",
+    "category": "devops"
+  },
+  "sentry": {
+    "command": "uvx",
+    "args": ["mcp-server-sentry"],
+    "env": { "SENTRY_AUTH_TOKEN": "${SENTRY_AUTH_TOKEN}" },
+    "description": "Query production error breadcrumbs and stack traces from Sentry.",
+    "category": "observability"
+  }
+}
