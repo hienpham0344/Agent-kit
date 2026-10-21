@@ -1,0 +1,343 @@
+#!/usr/bin/env python3
+"""
+Agents-kit CLI: Universal Manager for AI Agent Skills, Subagents, and Workflows.
+Author: User Custom AI Kit
+"""
+
+import os
+import sys
+import argparse
+import shutil
+import glob
+from pathlib import Path
+
+KIT_DIR = Path(__file__).resolve().parent.parent
+SKILLS_DIR = KIT_DIR / "skills"
+AGENTS_DIR = KIT_DIR / "agents"
+RULES_DIR = KIT_DIR / "rules"
+WORKFLOWS_DIR = KIT_DIR / "workflows"
+
+PRESETS = {
+    "full": [
+        "planning-grilling",
+        "engineering-core",
+        "architecture-domain",
+        "design-uiux",
+        "security-threat",
+        "stacks",
+        "ops-guardrails",
+        "documents-media",
+    ],
+    "web": [
+        "planning-grilling",
+        "engineering-core",
+        "design-uiux",
+        "documents-media",
+        "ops-guardrails",
+    ],
+    "backend": [
+        "planning-grilling",
+        "engineering-core",
+        "architecture-domain",
+        "security-threat",
+        "stacks",
+        "ops-guardrails",
+    ],
+    "devops": [
+        "ops-guardrails",
+        "security-threat",
+        "engineering-core",
+    ],
+    "security": [
+        "security-threat",
+        "ops-guardrails",
+        "engineering-core",
+    ],
+    "minimal": [
+        "planning-grilling",
+        "engineering-core",
+        "ops-guardrails",
+    ]
+}
+
+def detect_project_stack(target_path: Path) -> str:
+    """Analyze target directory files to detect language and framework."""
+    has_package_json = (target_path / "package.json").exists()
+    has_python = (target_path / "requirements.txt").exists() or (target_path / "pyproject.toml").exists()
+    has_java = (target_path / "pom.xml").exists() or (target_path / "build.gradle").exists()
+    has_docker = (target_path / "Dockerfile").exists() or (target_path / "docker-compose.yml").exists()
+
+    detected = []
+    if has_package_json:
+        detected.append("Web/Frontend (package.json)")
+    if has_python:
+        detected.append("Python Backend (requirements.txt / pyproject.toml)")
+    if has_java:
+        detected.append("Java/JVM (pom.xml / build.gradle)")
+    if has_docker:
+        detected.append("Containerized (Dockerfile / docker-compose)")
+
+    if detected:
+        print(f"🔎 Auto-detected stack: {', '.join(detected)}")
+    return "full"
+
+def get_skill_metadata(skill_path: Path) -> str:
+    skill_md = skill_path / "SKILL.md"
+    desc = ""
+    if skill_md.exists():
+        with open(skill_md, "r", encoding="utf-8", errors="ignore") as f:
+            for line in f:
+                if line.strip().startswith("description:"):
+                    desc = line.strip().replace("description:", "").strip(" \"'")
+                    break
+    return desc or "(No description available)"
+
+def cmd_list(args):
+    print("\n📦 AGENTS-KIT: CURATED SKILLS INVENTORY")
+    print("=" * 60)
+    total = 0
+    for cat in sorted(os.listdir(SKILLS_DIR)):
+        cat_path = SKILLS_DIR / cat
+        if cat_path.is_dir():
+            skills = sorted([d for d in cat_path.iterdir() if d.is_dir()])
+            total += len(skills)
+            print(f"\n📂 [{cat.upper()}] ({len(skills)} skills):")
+            for s in skills:
+                desc = get_skill_metadata(s)
+                print(f"  • {s.name:<32} {desc[:75]}...")
+    print("\n" + "=" * 60)
+    print(f"Total Curated Skills: {total}")
+
+    print("\n🤖 CONFIGURED AGENT PROFILES:")
+    profiles = sorted(glob.glob(str(AGENTS_DIR / "profiles" / "*.agent.md")))
+    for p in profiles:
+        print(f"  • {Path(p).stem}")
+
+    print("\n📋 STANDARD WORKFLOW RECIPES:")
+    recipes = sorted(glob.glob(str(WORKFLOWS_DIR / "recipes" / "*.md")))
+    for r in recipes:
+        print(f"  • {Path(r).stem}")
+    print()
+
+def cmd_install(args):
+    target = Path(args.target).resolve()
+    if not target.exists():
+        print(f"❌ Error: Target directory does not exist: {target}")
+        sys.exit(1)
+
+    preset = args.preset
+    if not preset or preset == "auto":
+        preset = detect_project_stack(target)
+
+    categories = PRESETS.get(preset, PRESETS["full"])
+    use_symlink = not args.copy
+
+    print(f"\n🚀 Installing Agents-kit to: {target}")
+    print(f"   Preset: {preset.upper()} (Categories: {', '.join(categories)})")
+    print(f"   Mode:   {'SYMLINK' if use_symlink else 'COPY'}")
+    print("-" * 60)
+
+    # 1. Create target directories
+    agents_dir = target / ".agents"
+    target_skills_dir = agents_dir / "skills"
+    github_agents_dir = target / ".github" / "agents"
+    github_hooks_dir = target / ".github" / "hooks"
+    docs_wf_dir = target / "docs" / "workflows"
+    docs_tmpl_dir = target / "docs" / "templates"
+
+    target_skills_dir.mkdir(parents=True, exist_ok=True)
+    github_agents_dir.mkdir(parents=True, exist_ok=True)
+    github_hooks_dir.mkdir(parents=True, exist_ok=True)
+    docs_wf_dir.mkdir(parents=True, exist_ok=True)
+    docs_tmpl_dir.mkdir(parents=True, exist_ok=True)
+
+    installed_count = 0
+    # 2. Install Skills
+    for cat in categories:
+        cat_path = SKILLS_DIR / cat
+        if not cat_path.exists():
+            continue
+        for s in sorted(cat_path.iterdir()):
+            if s.is_dir():
+                dst = target_skills_dir / s.name
+                if dst.exists() or dst.is_symlink():
+                    if dst.is_symlink() or dst.is_file():
+                        dst.unlink()
+                    else:
+                        shutil.rmtree(dst)
+                
+                if use_symlink:
+                    dst.symlink_to(s)
+                else:
+                    shutil.copytree(s, dst)
+                installed_count += 1
+
+    # 3. Copy Configuration Files
+    shutil.copy2(AGENTS_DIR / "agents.toml", agents_dir / "agents.toml")
+    shutil.copy2(RULES_DIR / "AGENTS.md", target / "AGENTS.md")
+    shutil.copy2(RULES_DIR / "copilot-instructions.md", target / ".github" / "copilot-instructions.md")
+
+    # Cursor rules
+    cursor_tmpl = WORKFLOWS_DIR / "templates" / "CURSORRULES-TEMPLATE.md"
+    if cursor_tmpl.exists() and not (target / ".cursorrules").exists():
+        shutil.copy2(cursor_tmpl, target / ".cursorrules")
+
+    # Hooks
+    if (WORKFLOWS_DIR / "hooks" / "context-mode.json").exists():
+        shutil.copy2(WORKFLOWS_DIR / "hooks" / "context-mode.json", github_hooks_dir / "context-mode.json")
+
+    # 4. Copy Agent Profiles
+    for p in glob.glob(str(AGENTS_DIR / "profiles" / "*.agent.md")):
+        shutil.copy2(p, github_agents_dir / Path(p).name)
+
+    # 5. Copy Workflows & Templates into docs/
+    for r in glob.glob(str(WORKFLOWS_DIR / "recipes" / "*.md")):
+        shutil.copy2(r, docs_wf_dir / Path(r).name)
+    for t in glob.glob(str(WORKFLOWS_DIR / "templates" / "*.md")):
+        shutil.copy2(t, docs_tmpl_dir / Path(t).name)
+
+    print(f"✅ Successfully installed {installed_count} skills into .agents/skills/")
+    print(f"✅ Synced .agents/agents.toml")
+    print(f"✅ Synced AGENTS.md & .cursorrules")
+    print(f"✅ Synced .github/copilot-instructions.md & .github/hooks/context-mode.json")
+    print(f"✅ Synced {len(glob.glob(str(github_agents_dir / '*.agent.md')))} agent profiles into .github/agents/")
+    print(f"✅ Synced {len(glob.glob(str(docs_wf_dir / '*.md')))} workflows into docs/workflows/")
+    print(f"✅ Synced {len(glob.glob(str(docs_tmpl_dir / '*.md')))} templates into docs/templates/\n")
+
+def cmd_sync(args):
+    """Synchronize an existing project with the latest Agents-kit updates."""
+    args.preset = "full"
+    args.copy = False
+    cmd_install(args)
+
+def cmd_audit(args):
+    target = Path(args.target).resolve()
+    print(f"\n🔍 Auditing Agents Configuration in: {target}")
+    print("-" * 60)
+
+    agents_dir = target / ".agents"
+    skills_dir = agents_dir / "skills"
+    agents_toml = agents_dir / "agents.toml"
+    agents_md = target / "AGENTS.md"
+    copilot_ins = target / ".github" / "copilot-instructions.md"
+    cursor_rules = target / ".cursorrules"
+    github_agents = target / ".github" / "agents"
+    docs_wf = target / "docs" / "workflows"
+    docs_tmpl = target / "docs" / "templates"
+
+    print(f"📁 .agents/skills/ : {'EXISTS' if skills_dir.exists() else 'MISSING'}")
+    if skills_dir.exists():
+        skills = list(skills_dir.iterdir())
+        broken = [s for s in skills if s.is_symlink() and not s.resolve().exists()]
+        print(f"   • Total skills count: {len(skills)}")
+        print(f"   • Broken symlinks:   {len(broken)}")
+        if broken:
+            for b in broken[:5]:
+                print(f"     ❌ Broken: {b.name} -> {os.readlink(b)}")
+
+    print(f"📄 agents.toml      : {'EXISTS' if agents_toml.exists() else 'MISSING'}")
+    print(f"📄 AGENTS.md        : {'EXISTS' if agents_md.exists() else 'MISSING'}")
+    print(f"📄 .cursorrules     : {'EXISTS' if cursor_rules.exists() else 'MISSING'}")
+    print(f"📄 copilot-inst.md  : {'EXISTS' if copilot_ins.exists() else 'MISSING'}")
+    print(f"🤖 .github/agents/  : {len(list(github_agents.iterdir())) if github_agents.exists() else 0} profiles found")
+    print(f"📋 docs/workflows/  : {len(list(docs_wf.iterdir())) if docs_wf.exists() else 0} runbooks found")
+    print(f"📐 docs/templates/  : {len(list(docs_tmpl.iterdir())) if docs_tmpl.exists() else 0} templates found")
+    print("-" * 60 + "\n")
+
+def cmd_doctor(args):
+    print("\n🩺 AGENTS-KIT SYSTEM & ENVIRONMENT HEALTH CHECK")
+    print("=" * 60)
+
+    # 1. Check tools
+    tools = {
+        "Git": "git",
+        "Python 3": "python3",
+        "Node.js": "node",
+        "Context Mode (MCP)": "context-mode",
+        "Docker": "docker"
+    }
+    for name, cmd in tools.items():
+        loc = shutil.which(cmd)
+        status = f"✅ INSTALLED ({loc})" if loc else "⚠️  NOT FOUND (Optional/Recommended)"
+        print(f"  • {name:<22}: {status}")
+
+    # 2. Check Agents-kit internal integrity
+    print("\n🔍 Internal Kit Integrity:")
+    skill_count = len(list(SKILLS_DIR.glob("**/SKILL.md")))
+    agent_count = len(list((AGENTS_DIR / "profiles").glob("*.agent.md")))
+    recipe_count = len(list((WORKFLOWS_DIR / "recipes").glob("*.md")))
+    template_count = len(list((WORKFLOWS_DIR / "templates").glob("*.md")))
+
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 85)")
+    print(f"  • Configured Subagents     : {agent_count} (Expected: 12)")
+    print(f"  • Workflow Recipes         : {recipe_count} (Expected: 5)")
+    print(f"  • Production Templates     : {template_count} (Expected: 13)")
+
+    if skill_count >= 85 and agent_count == 12 and recipe_count == 5:
+        print("\n🎉 Agents-kit status: 100% HEALTHY & READY TO USE!\n")
+    else:
+        print("\n⚠️ Agents-kit status: Some components missing.\n")
+
+def cmd_setup_env(args):
+    bashrc = Path.home() / ".bashrc"
+    bin_path = str(KIT_DIR / "bin")
+    export_line = f'export PATH="{bin_path}:$PATH"'
+
+    if not bashrc.exists():
+        print(f"❌ Error: {bashrc} not found.")
+        return
+
+    with open(bashrc, "r", encoding="utf-8") as f:
+        content = f.read()
+
+    if bin_path in content:
+        print(f"✅ Agents-kit binary path is already in {bashrc}!")
+    else:
+        with open(bashrc, "a", encoding="utf-8") as f:
+            f.write(f"\n# Agents-kit CLI path\n{export_line}\n")
+        print(f"🎉 Successfully added Agents-kit to {bashrc}!")
+        print("💡 Run 'source ~/.bashrc' or open a new terminal to use 'agents-kit' directly from anywhere!")
+
+def main():
+    parser = argparse.ArgumentParser(prog="agents-kit", description="Universal AI Agent Kit Manager")
+    subparsers = parser.add_subparsers(dest="command", required=True)
+
+    # list
+    subparsers.add_parser("list", help="List all curated skills, agents, and workflows")
+
+    # doctor
+    subparsers.add_parser("doctor", help="Run system diagnostics and verify environment")
+
+    # install
+    p_inst = subparsers.add_parser("install", help="Install skills and agents into target project")
+    p_inst.add_argument("target", help="Target project root directory")
+    p_inst.add_argument("--preset", choices=list(PRESETS.keys()) + ["auto"], default="auto", help="Installation preset")
+    p_inst.add_argument("--copy", action="store_true", help="Copy skills instead of creating symlinks")
+
+    # sync
+    p_sync = subparsers.add_parser("sync", help="Synchronize an existing project with latest updates")
+    p_sync.add_argument("target", nargs="?", default=".", help="Target project root directory")
+
+    # audit
+    p_audit = subparsers.add_parser("audit", help="Audit existing repository configuration")
+    p_audit.add_argument("target", nargs="?", default=".", help="Target project root directory")
+
+    # setup-env
+    subparsers.add_parser("setup-env", help="Add agents-kit to your ~/.bashrc for global CLI access")
+
+    args = parser.parse_args()
+    if args.command == "list":
+        cmd_list(args)
+    elif args.command == "doctor":
+        cmd_doctor(args)
+    elif args.command == "install":
+        cmd_install(args)
+    elif args.command == "sync":
+        cmd_sync(args)
+    elif args.command == "audit":
+        cmd_audit(args)
+    elif args.command == "setup-env":
+        cmd_setup_env(args)
+
+if __name__ == "__main__":
+    main()
