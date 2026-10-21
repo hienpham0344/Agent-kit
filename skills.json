@@ -1,11 +1,11 @@
 {
   "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
   "name": "agents-kit",
-  "version": "4.2.0",
-  "description": "Universal multi-stack engineering suite with 277+ production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
+  "version": "4.3.0",
+  "description": "Universal multi-stack engineering suite with 285+ production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
   "author": "Hien",
   "repository": "https://github.com/hienpham0344/Agent-kit",
-  "total_skills": 277,
+  "total_skills": 285,
   "skills": [
     {
       "name": "agentic-memory-patterns",
@@ -320,6 +320,12 @@
       "path": "skills/cloud-infra/kubernetes-helm-deployments/SKILL.md"
     },
     {
+      "name": "neon-postgres-branching",
+      "description": "Serverless Postgres copy-on-write branching for instant ephemeral test databases, PR previews, and schema migrations.",
+      "category": "cloud-infra",
+      "path": "skills/cloud-infra/neon-postgres-branching/SKILL.md"
+    },
+    {
       "name": "secrets-management-vault",
       "description": "Secure secrets management using HashiCorp Vault, dynamic database credentials, and secret rotation patterns.",
       "category": "cloud-infra",
@@ -396,6 +402,12 @@
       "description": "Centralized feature store management with Feast, unifying online low-latency inference and offline point-in-time correct training data.",
       "category": "data-ml-analytics",
       "path": "skills/data-ml-analytics/feature-store-feast/SKILL.md"
+    },
+    {
+      "name": "huggingface-hub-pipelines",
+      "description": "Hugging Face Hub integration, Transformers inference optimization, PEFT/LoRA fine-tuning, and quantized model deployment.",
+      "category": "data-ml-analytics",
+      "path": "skills/data-ml-analytics/huggingface-hub-pipelines/SKILL.md"
     },
     {
       "name": "jupyter-notebook-refactoring",
@@ -650,6 +662,12 @@
       "path": "skills/developer-productivity/gnupg-commit-signing-keys/SKILL.md"
     },
     {
+      "name": "google-workspace-automation",
+      "description": "Google Workspace API automation for Gmail, Google Sheets, Drive, and Docs with Service Accounts and batch operations.",
+      "category": "developer-productivity",
+      "path": "skills/developer-productivity/google-workspace-automation/SKILL.md"
+    },
+    {
       "name": "jq-yq-advanced-json-yaml-wrangling",
       "description": "Advanced JSON and YAML processing with jq and yq, stream transformations, deep filtering, and in-place updates.",
       "category": "developer-productivity",
@@ -818,6 +836,12 @@
       "path": "skills/engineering-core/webapp-testing/SKILL.md"
     },
     {
+      "name": "angular-signals-modern",
+      "description": "Modern Angular 18/19 architecture with Standalone components, reactive Signals, resource API, and Zoneless change detection.",
+      "category": "frontend-mastery",
+      "path": "skills/frontend-mastery/angular-signals-modern/SKILL.md"
+    },
+    {
       "name": "astro-island-architecture",
       "description": "High-performance content sites with Astro Islands, partial hydration directives (client:load, client:visible), and zero-JS baselines.",
       "category": "frontend-mastery",
@@ -882,6 +906,12 @@
       "description": "Performant, type-safe form management using React Hook Form, Zod schema validation, and dynamic field arrays.",
       "category": "frontend-mastery",
       "path": "skills/frontend-mastery/react-hook-form-zod/SKILL.md"
+    },
+    {
+      "name": "resend-react-email",
+      "description": "Transactional email engineering using Resend and React Email with strict delivery hygiene, SPF/DKIM verification, and webhooks.",
+      "category": "frontend-mastery",
+      "path": "skills/frontend-mastery/resend-react-email/SKILL.md"
     },
     {
       "name": "storybook-component-driven-dev",
@@ -1196,6 +1226,12 @@
       "path": "skills/planning-grilling/grill-with-docs/SKILL.md"
     },
     {
+      "name": "gstack-product-launch-workflow",
+      "description": "Garry Tan / YC product engineering workflow: Think, Design, Build, QA, and Launch with ruthless MVP scoping and user obsession.",
+      "category": "planning-grilling",
+      "path": "skills/planning-grilling/gstack-product-launch-workflow/SKILL.md"
+    },
+    {
       "name": "idea-refine",
       "description": "Refines raw ideas into sharp, actionable concepts through structured divergent and convergent thinking. Use when an idea is still vague, when you need to stress-test assumptions before committing to a plan, or when you want to expand options before converging on one. Triggers on \"ideate\", \"refine this idea\", or \"stress-test my plan\".",
       "category": "planning-grilling",
@@ -1502,6 +1538,12 @@
       "path": "skills/testing-performance/api-mocking-msw-wiremock/SKILL.md"
     },
     {
+      "name": "browserbase-cloud-automation",
+      "description": "Cloud headless browser automation with Browserbase, stealth fingerprints, session replay, CAPTCHA solving, and parallel web tasks.",
+      "category": "testing-performance",
+      "path": "skills/testing-performance/browserbase-cloud-automation/SKILL.md"
+    },
+    {
       "name": "chaos-engineering-resilience",
       "description": "Proactive resilience testing using Chaos Mesh and LitmusChaos, simulating pod crashes, CPU spikes, and dependency failures.",
       "category": "testing-performance",
@@ -1608,6 +1650,12 @@
       "description": "Progressive Web App (PWA) architecture, Workbox service worker caching strategies (Stale-While-Revalidate, Cache-First), and offline fallbacks.",
       "category": "web-advanced-graphics",
       "path": "skills/web-advanced-graphics/pwa-service-worker-caching/SKILL.md"
+    },
+    {
+      "name": "remotion-video-generation",
+      "description": "Programmatic video authoring and automated rendering in React with Remotion, frame-based timing, Canvas/Three.js integration, and SSR.",
+      "category": "web-advanced-graphics",
+      "path": "skills/web-advanced-graphics/remotion-video-generation/SKILL.md"
     },
     {
       "name": "shader-programming-glsl",

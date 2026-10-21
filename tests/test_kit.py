@@ -20,7 +20,7 @@ class TestAgentsKit(unittest.TestCase):
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
         skill_files = list(SKILLS_DIR.glob("**/SKILL.md"))
-        self.assertGreaterEqual(len(skill_files), 275, f"Expected at least 275 skills, found {len(skill_files)}")
+        self.assertGreaterEqual(len(skill_files), 285, f"Expected at least 285 skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -47,9 +47,9 @@ class TestAgentsKit(unittest.TestCase):
             self.assertIn("description:", content, f"{p.name} missing description in frontmatter")
 
     def test_workflow_recipes(self):
-        """Ensure all 9 standard workflow recipes exist and are detailed."""
+        """Ensure all 10 standard workflow recipes exist and are detailed."""
         recipes = list((WORKFLOWS_DIR / "recipes").glob("*.md"))
-        self.assertEqual(len(recipes), 9, f"Expected 9 workflow recipes, found {len(recipes)}")
+        self.assertEqual(len(recipes), 10, f"Expected 10 workflow recipes, found {len(recipes)}")
         for r in recipes:
             self.assertGreater(r.stat().st_size, 500, f"{r.name} appears too small or empty")
 
@@ -99,7 +99,14 @@ class TestAgentsKit(unittest.TestCase):
         with open(manifest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         self.assertIn("skills", data)
-        self.assertGreaterEqual(len(data["skills"]), 275)
+        self.assertGreaterEqual(len(data["skills"]), 285)
+
+    def test_cli_add_command(self):
+        """Ensure the 'agents-kit add' command is functional."""
+        import subprocess
+        res = subprocess.run([str(KIT_DIR / "bin" / "agents-kit"), "add", "--help"], stdout=subprocess.PIPE, text=True)
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("Import skills from a GitHub repository", res.stdout)
 
 if __name__ == "__main__":
     unittest.main()

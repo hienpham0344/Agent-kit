@@ -292,15 +292,15 @@ def cmd_doctor(args):
     template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
     ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 277)")
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 285)")
     print(f"  • Configured Subagents     : {agent_count} (Expected: 22)")
-    print(f"  • Workflow Recipes         : {recipe_count} (Expected: 9)")
+    print(f"  • Workflow Recipes         : {recipe_count} (Expected: 10)")
     print(f"  • Production Templates     : {template_count} (Expected: 18)")
     print(f"  • Reference Guides         : {ref_count} (Expected: 6)")
     has_skills_json = (KIT_DIR / "skills.json").exists()
     print(f"  • Universal skills.json    : {'✅ PRESENT' if has_skills_json else '⚠️ MISSING'}")
 
-    if skill_count >= 275 and agent_count == 22 and recipe_count >= 9:
+    if skill_count >= 285 and agent_count == 22 and recipe_count >= 10:
         print("\n🎉 Agents-kit status: 100% HEALTHY & READY TO USE!\n")
     else:
         print("\n⚠️ Agents-kit status: Some components missing.\n")
@@ -424,8 +424,8 @@ def cmd_export_skills_json(args):
     manifest = {
         "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
         "name": "agents-kit",
-        "version": "4.2.0",
-        "description": "Universal multi-stack engineering suite with 277+ production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
+        "version": "4.3.0",
+        "description": "Universal multi-stack engineering suite with 285+ production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
         "author": "Hien",
         "repository": "https://github.com/hienpham0344/Agent-kit",
         "total_skills": len(skills_list),
@@ -584,7 +584,11 @@ def main():
     p_exp.add_argument("-o", "--output", help="Output path for skills.json")
 
     # add (compatible with vercel-labs/skills)
-    p_add = subparsers.add_parser("add", help="Import skills from a GitHub repository or community source")
+    p_add = subparsers.add_parser(
+        "add",
+        help="Import skills from a GitHub repository or community source",
+        description="Import skills from a GitHub repository or community source"
+    )
     p_add.add_argument("source", help="GitHub repo (e.g., supabase/agent-skills) or Git URL")
     p_add.add_argument("--target", default=".", help="Target project root directory (default: current dir)")
     p_add.add_argument("--skill", default="", help="Specific skill name to import (optional)")
