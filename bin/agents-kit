@@ -159,12 +159,14 @@ def cmd_install(args):
     github_hooks_dir = target / ".github" / "hooks"
     docs_wf_dir = target / "docs" / "workflows"
     docs_tmpl_dir = target / "docs" / "templates"
+    docs_ref_dir = target / "docs" / "references"
 
     target_skills_dir.mkdir(parents=True, exist_ok=True)
     github_agents_dir.mkdir(parents=True, exist_ok=True)
     github_hooks_dir.mkdir(parents=True, exist_ok=True)
     docs_wf_dir.mkdir(parents=True, exist_ok=True)
     docs_tmpl_dir.mkdir(parents=True, exist_ok=True)
+    docs_ref_dir.mkdir(parents=True, exist_ok=True)
 
     installed_count = 0
     # 2. Install Skills
@@ -205,11 +207,16 @@ def cmd_install(args):
     for p in glob.glob(str(AGENTS_DIR / "profiles" / "*.agent.md")):
         shutil.copy2(p, github_agents_dir / Path(p).name)
 
-    # 5. Copy Workflows & Templates into docs/
+    # 5. Copy Workflows, Templates & References into docs/
     for r in glob.glob(str(WORKFLOWS_DIR / "recipes" / "*.md")):
         shutil.copy2(r, docs_wf_dir / Path(r).name)
     for t in glob.glob(str(WORKFLOWS_DIR / "templates" / "*.md")):
         shutil.copy2(t, docs_tmpl_dir / Path(t).name)
+    for rf in (KIT_DIR / "references").glob("**/*.md"):
+        rel = rf.relative_to(KIT_DIR / "references")
+        dst = docs_ref_dir / rel
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(rf, dst)
 
     print(f"✅ Successfully installed {installed_count} skills into .agents/skills/")
     print(f"✅ Synced .agents/agents.toml")
@@ -217,7 +224,8 @@ def cmd_install(args):
     print(f"✅ Synced .github/copilot-instructions.md & .github/hooks/context-mode.json")
     print(f"✅ Synced {len(glob.glob(str(github_agents_dir / '*.agent.md')))} agent profiles into .github/agents/")
     print(f"✅ Synced {len(glob.glob(str(docs_wf_dir / '*.md')))} workflows into docs/workflows/")
-    print(f"✅ Synced {len(glob.glob(str(docs_tmpl_dir / '*.md')))} templates into docs/templates/\n")
+    print(f"✅ Synced {len(glob.glob(str(docs_tmpl_dir / '*.md')))} templates into docs/templates/")
+    print(f"✅ Synced {len(list(docs_ref_dir.glob('**/*.md')))} reference guides into docs/references/\n")
 
 def cmd_sync(args):
     """Synchronize an existing project with the latest Agents-kit updates."""
