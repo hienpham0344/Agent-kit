@@ -1,6 +1,6 @@
 ---
 name: gstack-product-launch-workflow
-description: Garry Tan / YC product engineering workflow: Think, Design, Build, QA, and Launch with ruthless MVP scoping and user obsession.
+description: "Garry Tan / YC product engineering workflow: Think, Design, Build, QA, and Launch with ruthless MVP scoping and user obsession."
 ---
 
 # Garry Tan & YC Product Launch Workflow (`gstack`)
