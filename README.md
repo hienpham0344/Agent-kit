@@ -15,8 +15,8 @@
 [![Universal Spec](https://img.shields.io/badge/skills.json-Vercel%20%26%20Anthropic-black.svg?style=flat-square)](skills.json)
 [![References](https://img.shields.io/badge/References-6%20Cookbooks-ff69b4.svg?style=flat-square)](references/)
 [![MCP Servers](https://img.shields.io/badge/MCP%20Servers-10%20Integrated-0052cc.svg?style=flat-square)](mcp/)
-[![Token Efficiency](https://img.shields.io/badge/Token%20Savings-Up%20to%2098%25-brightgreen.svg?style=flat-square)](tools/token_estimator.py)
-[![Test Suite](https://img.shields.io/badge/Tests-8%2F8%20PASS-brightgreen.svg?style=flat-square)](tests/)
+[![Token Efficiency](https://img.shields.io/badge/Token%20Savings-Up%20to%2098.98%25-brightgreen.svg?style=flat-square)](tools/token_benchmark.py)
+[![Test Suite](https://img.shields.io/badge/Tests-12%2F12%20PASS-brightgreen.svg?style=flat-square)](tests/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 
 <br/>
@@ -134,46 +134,55 @@ cd /path/to/my-project
 
 ```bash
 # Method A: Auto-detected Stack (Recommended)
-# Automatically scans project files (package.json, pom.xml, pyproject.toml, etc.)
+# Intelligently inspects project markers (package.json, pom.xml, pyproject.toml, Dockerfile)
+# Automatically chooses the optimal preset with zero risk of over-installing full suite
 agents-kit install . --preset auto
 
 # Method B: Full Enterprise Suite
-# Injects all 285 skills, 22 subagents, 10 runbooks, 18 templates & 6 cookbooks
+# Installs all 285 skills, 22 subagents, 10 runbooks, 18 templates & 6 cookbooks
 agents-kit install . --preset full
 
 # Method C: Standalone Copy Mode (For Team Sharing & CI/CD)
 # Copies files instead of creating symlinks (so skills can be committed to Git)
 agents-kit install . --preset auto --copy
+
+# Method D: Safe Dry-Run (Preview Operations)
+# Inspects exactly what would be created or updated without touching the disk
+agents-kit install . --preset auto --dry-run
+
+# Method E: Safe Backup Mode
+# Backs up any conflicting or modified files to .agents/backups/ before updating
+agents-kit install . --preset auto --backup
 ```
 
 #### Available Presets Reference
 
 | Preset | Target Tech Stack | Curated Categories Included |
 | :--- | :--- | :--- |
-| `auto` *(Recommended)* | Auto-detected | Intelligently inspects project files (`package.json`, `pom.xml`, `pyproject.toml`, etc.) |
+| `auto` *(Recommended)* | Auto-detected | Intelligently inspects project files (`package.json`, `pom.xml`, `pyproject.toml`, etc.) and selects `web`, `backend`, `devops`, or `minimal`. |
 | `full` | Enterprise Suite | **All 21 domains** (285 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks) |
-| `web` | Frontend & Fullstack | `planning-grilling`, `engineering-core`, `design-uiux`, `frontend-mastery`, `ops-guardrails` |
+| `web` | Frontend & Fullstack | `planning-grilling`, `engineering-core`, `design-uiux`, `frontend-mastery`, `ops-guardrails`, `web-advanced-graphics`, `documents-media` |
 | `backend` | Servers, APIs & DB | `planning-grilling`, `engineering-core`, `architecture-domain`, `security-threat`, `stacks`, `ops-guardrails` |
-| `devops` | Cloud & Infrastructure| `ops-guardrails`, `security-threat`, `cloud-infra`, `sre-observability`, `cloud-aws-gcp-azure` |
+| `devops` | Cloud & Infrastructure| `ops-guardrails`, `security-threat`, `cloud-infra`, `sre-observability`, `cloud-aws-gcp-azure`, `engineering-core` |
 | `security` | Red / Blue Team | `security-threat`, `security-redteam`, `ops-guardrails`, `engineering-core` |
-| `minimal` | Lightweight Core | Core TDD, basic planning, systematic debugging, and essential guardrails |
+| `minimal` | Lightweight Core | `planning-grilling`, `engineering-core`, `ops-guardrails` (Core TDD, systematic debugging, essential guardrails) |
 
 #### Real Installation Output Preview:
 ```text
-🔎 Auto-detected stack: Web/Frontend (package.json)
+🔎 Auto-Detection Result:
+   • Recommended Preset : BACKEND
+   • Confidence         : 90%
+   • Explanation        : Detected backend application: python.
+   • Evidence           : Python project (pyproject.toml)
 
-🚀 Installing Agents-kit to: /home/dev/my-project
-   Preset: FULL (Categories: 21 domains)
-   Mode:   SYMLINK
-------------------------------------------------------------
-✅ Successfully installed 285 skills into .agents/skills/
-✅ Synced .agents/agents.toml
-✅ Synced AGENTS.md & .cursorrules
-✅ Synced .github/copilot-instructions.md & .github/hooks/context-mode.json
-✅ Synced 22 agent profiles into .github/agents/
-✅ Synced 10 workflows into docs/workflows/
-✅ Synced 18 templates into docs/templates/
-✅ Synced 6 reference guides into docs/references/
+🚀 Agents-kit Installation Plan: /home/dev/my-project
+   Preset:     BACKEND
+   Categories: 6 (architecture-domain, engineering-core, ops-guardrails, planning-grilling, security-threat, stacks)
+   Mode:       SYMLINK
+   Operations: 86 files planned
+-----------------------------------------------------------------
+✅ Successfully installed 86 skills and configs into /home/dev/my-project
+📄 Installation manifest recorded at: /home/dev/my-project/.agents/agents-kit.manifest.json
 ```
 
 ---
@@ -734,56 +743,79 @@ Click on any domain to inspect its curated skills:
 
 ## 🧰 CLI Suite & Developer Tools
 
-Agents-Kit includes a built-in CLI manager and diagnostic tooling:
+Agents-Kit includes a built-in modular CLI manager and diagnostic tooling:
 
 ```
 Agents-kit CLI v4.3.0
 ├── bin/agents-kit           # Primary executable manager
+├── core/                    # Modular CLI Architecture
+│   ├── detection.py         # Multi-stack auto-detection engine
+│   ├── planner.py           # Safe installation planner with conflict resolution
+│   ├── manifest.py          # Managed state & SHA256 integrity tracker
+│   ├── registry.py          # 3-Level progressive skill catalog
+│   ├── routing.py           # Task-driven skill recommendation engine
+│   ├── presets.py           # Presets and category synchronization
+│   └── security.py          # Path traversal and input validation
 └── tools/
+    ├── token_benchmark.py   # Reproducible token savings benchmark runner
+    ├── skill_linter.py      # Skill quality, YAML frontmatter & safety linter
     ├── token_estimator.py   # Token footprint analyzer (characters, words, context %)
     ├── ast_analyzer.py      # Python AST complexity & function signature scanner
     ├── skill_scaffolder.py  # Interactive SKILL.md generator with standard frontmatter
-    └── mcp_manager.py       # MCP server discovery, verification, and diagnostics
+    └── mcp_manager.py       # 4-level MCP discovery, verification, and diagnostics
 ```
 
 ### Command Cheat Sheet
 
 ```bash
-# 1. Search across all 285 skills by keyword
+# 1. Intelligent Skill Recommendation (Task-driven & context-aware)
+agents-kit recommend "Debug Java Spring Boot auth failure with JWT" --explain
+agents-kit recommend "Build drag and drop animations in React" --project .
+
+# 2. Search across all 285 skills by keyword
 agents-kit search "redis caching"
 agents-kit search "react 19"
 agents-kit search "neon branching"
 
-# 2. Import external skills from any GitHub repo (Vercel/community compatible)
+# 3. Safe installation with conflict protection, dry-run, and backup
+agents-kit install . --preset auto
+agents-kit install . --preset auto --dry-run
+agents-kit install . --preset backend --backup
+
+# 4. Safe synchronization (preserves previous preset, mode, and unedited files)
+agents-kit sync .
+
+# 5. Import external skills with strict path traversal & safety validation
 agents-kit add supabase/agent-skills
 agents-kit add browserbase/skills --skill browserbase-cloud-automation
 
-# 3. Check environment & internal kit health (285 skills, 22 agents, 10 runbooks)
+# 6. Check environment & internal kit health (285 skills, 22 agents, 10 runbooks)
 agents-kit doctor
 
-# 4. Export universal skills.json manifest for Vercel/Anthropic
-agents-kit export-skills-json
-
-# 5. Discover and verify Model Context Protocol servers
-agents-kit mcp
+# 7. Model Context Protocol (MCP) health verification & doctor
+agents-kit mcp list
+agents-kit mcp doctor
 agents-kit mcp verify context-mode
 
-# 6. Scaffold a new production skill
+# 8. Export universal skills.json manifest for Vercel/Anthropic
+agents-kit export-skills-json
+
+# 9. Scaffold a new production skill
 agents-kit create-skill redis-sentinel-failover --domain data-streaming --description "Redis Sentinel HA"
 
-# 7. View reference guides, cheat sheets & cookbooks
+# 10. View reference guides, cheat sheets & cookbooks
 agents-kit reference
 agents-kit reference css
 agents-kit reference react
 
-# 8. Run automated test suite (8/8 tests)
+# 11. Run automated test suite (12/12 tests PASS)
 agents-kit test
 
-# 9. Analyze token consumption on a file or prompt
-python3 tools/token_estimator.py path/to/file.py
+# 12. Run skill quality and security linter across 285 skills
+python3 tools/skill_linter.py
 
-# 10. Scan Python AST complexity
-python3 tools/ast_analyzer.py path/to/source/
+# 13. Run reproducible token savings benchmark
+python3 tools/token_benchmark.py
 ```
 
 ---
@@ -876,22 +908,22 @@ Agents-kit/
 
 ## 🧪 Automated Verification & Quality Assurance
 
-Every skill, agent profile, workflow, and template in Agents-Kit is validated by an automated test suite:
+Every skill, agent profile, workflow, template, CLI command, and routing mechanism in Agents-Kit is validated by an automated test suite:
 
 ```bash
-# Run test suite
-python3 tests/test_kit.py
-
-# Or via CLI
+# Run test suite via CLI
 agents-kit test
+
+# Or directly via unittest
+python3 -m unittest discover tests/
 ```
 
 ```
-........
+............
 ----------------------------------------------------------------------
-Ran 8 tests in 0.260s
+Ran 12 tests in 0.974s
 
-OK (285 skills validated, 22 subagents verified, 10 recipes checked, 18 templates confirmed, 6 reference guides checked, skills.json verified)
+OK (285 skills validated, 22 subagents verified, 10 recipes checked, 18 templates confirmed, 6 reference guides checked, skills.json verified, detection tested, routing verified, safety tested)
 ```
 
 ---
