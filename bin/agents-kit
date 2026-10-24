@@ -22,6 +22,9 @@ from core.planner import InstallationPlanner
 from core.manifest import ManifestManager
 from core.registry import SkillRegistry
 from core.routing import SkillRouter
+from core.agent_router import AgentRouter
+from core.orchestration import OrchestrationEngine
+from core.hosts.adapters import get_adapter, HOST_ADAPTERS
 from core.security import validate_skill_name, validate_safe_destination
 from core.cli import safe_run_subprocess
 
@@ -171,19 +174,30 @@ def cmd_sync(args):
 
 def cmd_recommend(args):
     """Recommend best skills for a specific user task description."""
+    import json
     router = SkillRouter(KIT_DIR)
     target = Path(args.project).resolve() if args.project else None
     res = router.recommend(args.task, target_dir=target, top_k=args.top)
 
+    if getattr(args, "json", False):
+        print(json.dumps(res.to_dict(), indent=2, ensure_ascii=False))
+        return
+
     print(f"\n🎯 INTELLIGENT SKILL RECOMMENDATIONS")
     print("=" * 65)
     print(f"Task: \"{args.task}\"")
+    print(f"Decision: {res.decision.upper()}")
+    if res.intent_analysis:
+        print(f"Intents: {res.intent_analysis.primary_intent} {res.intent_analysis.secondary_intents}")
     if res.project_context and res.project_context.detected_languages:
         print(f"Project Context: {', '.join(res.project_context.detected_languages)}")
     print("-" * 65)
 
     if not res.recommendations:
-        print("No high-confidence skills matched this task. Try broadening your keywords.")
+        print("No high-confidence skills matched this task.")
+        if res.warnings:
+            for w in res.warnings:
+                print(f"💡 {w}")
         return
 
     for idx, rec in enumerate(res.recommendations, 1):
@@ -192,14 +206,102 @@ def cmd_recommend(args):
         print(f"   {s.description[:85]}...")
         if args.explain:
             print(f"   💡 Rationale : {'; '.join(rec.reasons)}")
+            if rec.resolved_dependencies:
+                print(f"   🔗 Dependencies: {', '.join(rec.resolved_dependencies)}")
             print(f"   📂 Location  : {s.rel_path}")
         print()
 
     if res.conflicts:
-        print("⚠️ Routing Guidance:")
+        print("⚠️ Routing Guidance & Conflicts:")
         for c in res.conflicts:
             print(f"   • {c}")
         print()
+
+def cmd_plan(args):
+    """Decompose high-level task into a dependency-aware orchestration plan with agent delegation."""
+    import json
+    router = SkillRouter(KIT_DIR)
+    agent_router = AgentRouter(KIT_DIR)
+    engine = OrchestrationEngine(KIT_DIR)
+
+    target = Path(args.project).resolve() if args.project else None
+    s_res = router.recommend(args.task, target_dir=target, top_k=3)
+    selected_skill_names = [r.skill.name for r in s_res.recommendations]
+
+    a_res = agent_router.route_agent(
+        args.task,
+        s_res.intent_analysis,
+        selected_skill_names,
+        s_res.project_context
+    )
+
+    primary_agent = a_res.primary_agent.id if a_res.primary_agent else "main_agent"
+    secondary_agent = a_res.secondary_agent.id if a_res.secondary_agent else None
+
+    plan = engine.decompose_task(
+        args.task,
+        primary_agent=primary_agent,
+        secondary_agent=secondary_agent,
+        selected_skills=selected_skill_names
+    )
+
+    if getattr(args, "json", False):
+        out = {
+            "orchestration_plan": plan.to_dict(),
+            "agent_routing": a_res.to_dict(),
+            "skill_recommendations": s_res.to_dict()
+        }
+        print(json.dumps(out, indent=2, ensure_ascii=False))
+        return
+
+    print(f"\n📋 AGENT-KIT ORCHESTRATION PLAN")
+    print("=" * 65)
+    print(f"Task: \"{args.task}\"")
+    print(f"Delegation Policy: {a_res.delegation_policy.upper()}")
+    print(f"Assigned Primary : {primary_agent}")
+    if secondary_agent:
+        print(f"Assigned Reviewer: {secondary_agent}")
+    print(f"Rationale        : {'; '.join(a_res.reasons)}")
+    print("-" * 65)
+    print("Execution Workstreams:")
+    for step in plan.steps:
+        deps = f" [Depends on: {', '.join(step.dependencies)}]" if step.dependencies else " [Independent]"
+        print(f"  • {step.id:<22} : {step.title}")
+        print(f"    Actor: {step.assigned_agent:<18} Skills: {', '.join(step.required_skills)}")
+        if step.verification_command:
+            print(f"    Verification Gate: {step.verification_command}")
+    print("=" * 65)
+    print("💡 Note: Run steps natively in your AI coding environment.\n")
+
+def cmd_agents(args):
+    """Inspect and validate configured subagent profiles."""
+    agent_router = AgentRouter(KIT_DIR)
+    agents = agent_router.agent_registry.list_all()
+
+    if args.action == "list":
+        print(f"\n🤖 CONFIGURED SUBAGENTS ({len(agents)} profiles)")
+        print("=" * 65)
+        for a in sorted(agents, key=lambda x: x.id):
+            status = "✅ READY" if a.is_ready else f"⚠️ MISSING SKILLS ({', '.join(a.missing_skills)})"
+            print(f"  • {a.id:<24} : {a.role}")
+            print(f"    Status: {status}")
+            print(f"    Skills ({len(a.skills)}): {', '.join(a.skills[:4])}...")
+        print()
+    elif args.action == "validate":
+        print(f"\n🔍 VALIDATING AGENT PROFILES & SKILL READINESS")
+        print("=" * 65)
+        ready_count = sum(1 for a in agents if a.is_ready)
+        print(f"Total Agents Checked : {len(agents)}")
+        print(f"Ready for Invocation : {ready_count}")
+        print(f"Missing Dependencies : {len(agents) - ready_count}")
+        print("=" * 65)
+        if ready_count == len(agents):
+            print("🎉 ALL 22 SUBAGENTS ARE FULLY COMPATIBLE & READY!\n")
+        else:
+            for a in agents:
+                if not a.is_ready:
+                    print(f"  ❌ {a.id}: missing skills {a.missing_skills}")
+            print()
 
 def cmd_audit(args):
     target = Path(args.target).resolve()
@@ -442,6 +544,7 @@ def main():
     p_inst = subparsers.add_parser("install", help="Install skills and agents into target project")
     p_inst.add_argument("target", help="Target project root directory")
     p_inst.add_argument("--preset", choices=list(PRESETS.keys()) + ["auto"], default="auto", help="Installation preset")
+    p_inst.add_argument("--host", choices=list(HOST_ADAPTERS.keys()) + ["all"], default="antigravity", help="Target AI host environment")
     p_inst.add_argument("--copy", action="store_true", help="Copy skills instead of creating symlinks")
     p_inst.add_argument("--dry-run", action="store_true", help="Show planned operations without modifying files")
     p_inst.add_argument("--force", action="store_true", help="Force overwrite on file conflicts")
@@ -460,6 +563,17 @@ def main():
     p_rec.add_argument("--project", default=".", help="Target project root for stack context")
     p_rec.add_argument("--top", type=int, default=5, help="Number of recommendations")
     p_rec.add_argument("--explain", action="store_true", help="Explain why each skill was chosen")
+    p_rec.add_argument("--json", action="store_true", help="Output recommendation in JSON format")
+
+    # plan
+    p_plan = subparsers.add_parser("plan", help="Decompose high-level task into orchestration plan")
+    p_plan.add_argument("task", help="Task description")
+    p_plan.add_argument("--project", default=".", help="Target project root for stack context")
+    p_plan.add_argument("--json", action="store_true", help="Output plan in JSON format")
+
+    # agents
+    p_ag = subparsers.add_parser("agents", help="Inspect and validate subagent profiles")
+    p_ag.add_argument("action", nargs="?", default="list", choices=["list", "validate"], help="Agent action")
 
     # audit
     p_audit = subparsers.add_parser("audit", help="Audit existing repository configuration")
@@ -512,6 +626,8 @@ def main():
         "install": cmd_install,
         "sync": cmd_sync,
         "recommend": cmd_recommend,
+        "plan": cmd_plan,
+        "agents": cmd_agents,
         "audit": cmd_audit,
         "setup-env": cmd_setup_env,
         "search": cmd_search,
