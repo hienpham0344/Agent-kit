@@ -47,26 +47,13 @@
 
 ---
 
-## 3. Subagent Orchestration Lifecycle
+## 3. Automatic Skill and Subagent Routing
 
-For large changes spanning multiple components, use these stages as a checklist. For small edits and bug fixes, use only relevant stages. Delegate only when work is independent; deploy or release only when requested:
+For each coding request, match its goal and project stack to the installed skills in `.agents/skills/`. Read the matching `SKILL.md` automatically; the user does not need to name it. Select one primary skill and add a supporting skill only when it provides a distinct necessary procedure. Ignore archived, disabled, or uninstalled skills.
 
-```mermaid
-flowchart TD
-    Req["1. Requirement / User Goal"] --> Arch["2. System Planning & Architecture<br/>(system_coordinator / frontend_architect)"]
-    Arch --> TDD["3. Test-First Specification<br/>(Write unit/contract tests)"]
-    TDD --> Dev["4. Surgical Implementation<br/>(frontend_developer / python_backend / java_pro)"]
-    Dev --> Sec["5. Security & Threat Audit<br/>(security_auditor / redteam_security)"]
-    Sec --> QA["6. Verification & Code Review<br/>(qa_reviewer: build, lint, test, a11y)"]
-    QA --> Done["Ready for Git Commit"]
-```
+Handle small and sequential work in the main agent. For an independent specialist investigation or review with a clear deliverable, proactively delegate to a matching available subagent, with a narrow file scope and expected output. Wait for its result and summarize it. Do not spawn an agent merely to fill a fixed lifecycle stage. Use focused checks and bounded tool output to conserve context.
 
-### Subagent Roster (`agents.toml`):
-- **Architecture & Coordination**: `system_coordinator`, `frontend_architect`, `database_architect`, `cloud_architect`.
-- **Implementation**: `frontend_developer`, `python_backend`, `java_pro`, `mobile_dev`, `systems_engineer`.
-- **UI / Art Direction**: `ui_ux_designer` (WCAG AA, token system), `taste_craftsman` (anti-slop aesthetic, typography).
-- **Quality & Performance**: `qa_reviewer` (two-axis review), `web_performance_auditor`, `load_tester`, `sre_specialist`.
-- **Security**: `security_auditor` (STRIDE threat modeling, content sanitization), `redteam_security`.
+`agents/agents.toml` is the Agents-kit role registry used by its CLI; it does not create Codex subagents. Codex uses available built-in agents or TOML profiles in `~/.codex/agents/` and `.codex/agents/`. If the host has no matching agent, continue in the main agent. Never assume a planned role was actually spawned.
 
 ---
 

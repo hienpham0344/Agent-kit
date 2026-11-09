@@ -218,11 +218,13 @@ How does your AI assistant discover Agents-Kit? Skill files are local; external 
 | AI Editor / Tool | Discovery Mechanism | What to Do Next |
 | :--- | :--- | :--- |
 | **Google Antigravity** | Automatically reads `.agents/agents.toml`, `.agents/skills/`, and `AGENTS.md` | Open project folder in Antigravity. Subagents and skills are immediately active. |
-| **Codex** | Reads `AGENTS.md` and discovers `.agents/skills/` | Open the project in Codex. `agents.toml` is an Agents-kit role registry; Codex custom agents require `.codex/agents/*.toml`. |
+| **Codex** | Reads `AGENTS.md` and discovers active `.agents/skills/` | Open the project in Codex and describe the task normally. A matching installed skill can be selected without naming it. `agents.toml` is an Agents-kit CLI role registry; Codex subagents require available built-in roles or TOML profiles in `.codex/agents/` or `~/.codex/agents/`. |
 | **Cursor IDE** | Automatically reads `.cursorrules` in project root | Open project in Cursor. Agent personas and rules are automatically loaded into Chat & Composer. |
 | **Claude Code (CLI)** | Automatically reads `AGENTS.md` in the current working directory | Run `claude` inside your project root. Prompt your agent with runbooks and skills. |
 | **Windsurf / Cascade** | Reads `AGENTS.md` and `.cursorrules` | Open workspace in Windsurf. Cascade inherits all behavioral guidelines. |
 | **GitHub Copilot** | Automatically reads `.github/copilot-instructions.md` | Open project in VS Code or JetBrains. Copilot Chat immediately follows project rules. |
+
+For consistent Codex behavior across projects, keep the short routing policy in `~/.codex/AGENTS.md`; installed projects also receive it through `rules/AGENTS.md`. Codex discovers active skills from `.agents/skills/` and selects them from their descriptions. `agents-kit recommend` and `agents-kit plan` are optional diagnostics; they print suggestions and do not invoke subagents. Delegation depends on the task, available agent roles, and host instructions. Subagents add their own token cost, so small or sequential tasks stay in the main agent.
 
 ---
 
