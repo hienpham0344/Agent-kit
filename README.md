@@ -84,7 +84,7 @@ Before starting, verify your environment meets the minimum requirements:
 | Requirement | Minimum Version | Verification Command | Status & Purpose |
 | :--- | :--- | :--- | :--- |
 | **Operating System** | Linux, macOS, or WSL2 | `uname -s` | **Required** (Native Unix filesystem & symlink support) |
-| **Python** | 3.10+ | `python3 --version` | **Required** (CLI manager, AST analyzer, and test suite) |
+| **Python** | 3.11+ | `python3 --version` | **Required** (CLI manager uses `tomllib`, AST analyzer, and test suite) |
 | **Git** | 2.25+ | `git --version` | **Required** (Cloning repositories, submodule & worktree ops) |
 | **Node.js / npm** | 18+ | `node -v` | **Recommended** (Running MCP servers like context-mode, puppeteer) |
 | **Docker** | 24+ | `docker -v` | **Optional** (Containerization recipes and load-testing swarms) |
@@ -111,7 +111,10 @@ source ~/.zshrc
 
 # 3. Verify health & dependency integrity
 agents-kit doctor
+agents-kit doctor --project /path/to/my-project
 ```
+
+`doctor` checks the kit catalog, executable availability, and the current project by default. Use `--project` to inspect another directory. It distinguishes `SOURCE`, `UNINSTALLED`, `UNMANAGED`, `MANAGED`, `INCOMPLETE`, and invalid manifests; it reports broken skill links, missing or modified managed files, and a safe next command. Diagnostics are read-only. A project with active skills but no manifest is `UNMANAGED`; inspect it with `agents-kit audit` before syncing. Codex runtime skill invocation and MCP handshakes are not verified by this command.
 
 > [!TIP]
 > **No-PATH / One-Shot Alternative:**
@@ -151,7 +154,7 @@ agents-kit install . --preset auto --copy
 agents-kit install . --preset auto --dry-run
 
 # Method E: Safe Backup Mode
-# Backs up any conflicting or modified files to .agents/backups/ before updating
+# Backs up any conflicting or modified files under a unique .agents/backups/install-*/ directory before updating
 agents-kit install . --preset auto --backup
 ```
 
@@ -243,6 +246,8 @@ git pull origin main
 cd /path/to/my-project
 agents-kit sync .
 ```
+
+`sync` stops on conflicts unless `--backup` or `--force` is supplied. Prefer `--backup` when updating a modified managed file; inspect the plan with `--dry-run` first.
 
 #### Clean Uninstallation
 If you ever want to remove Agents-Kit from a project, your source code and git history remain 100% untouched:
