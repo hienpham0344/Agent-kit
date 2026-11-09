@@ -9,8 +9,8 @@ description: Mathematical typography scaling with CSS clamp(), modular type scal
 Scales typography smoothly across device widths without disjointed media query jumps using mathematical linear interpolation in `clamp()`.
 
 ## Reference Guide
-- `references/frontend/modern-css-cheat-sheet.md`
-- `references/frontend/design-tokens-and-color-palettes.md`
+- `docs/references/frontend/modern-css-cheat-sheet.md`
+- `docs/references/frontend/design-tokens-and-color-palettes.md`
 
 ## Spacing Formula
 ```css

@@ -9,7 +9,7 @@ description: Component-driven responsive design using CSS Container Queries (@co
 Builds responsive components that adapt to their immediate parent container width rather than the screen viewport, pairing with Subgrid for row alignment.
 
 ## Reference Guide
-- `references/frontend/modern-css-cheat-sheet.md`
+- `docs/references/frontend/modern-css-cheat-sheet.md`
 
 ## Code Pattern
 ```css

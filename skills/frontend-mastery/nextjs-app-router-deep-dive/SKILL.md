@@ -9,7 +9,7 @@ description: Next.js 15 App Router architecture, parallel/intercepting routes, s
 Deep architectural patterns for Next.js App Router, combining Server Components (RSC) with streaming Suspense and advanced routing.
 
 ## References
-- Architectural reference: `references/frontend/react-19-and-nextjs15-reference.md`
+- Architectural reference: `docs/references/frontend/react-19-and-nextjs15-reference.md`
 - Next.js documentation: https://nextjs.org/docs/app
 
 ## Parallel Routes & Modal Interception Pattern

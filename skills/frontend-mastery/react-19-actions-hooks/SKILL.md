@@ -9,7 +9,7 @@ description: React 19 modern hooks and server action patterns including use(), u
 Guides the implementation of React 19 core features, eliminating boilerplate state management for async data and mutations.
 
 ## References & Documentation
-- Authoritative reference guide: `references/frontend/react-19-and-nextjs15-reference.md`
+- Authoritative reference guide: `docs/references/frontend/react-19-and-nextjs15-reference.md`
 - React official docs: https://react.dev/reference/react
 
 ## The use() Hook for Conditional Promise Unwrapping

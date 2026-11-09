@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
 Automated Test Suite for Agents-kit
-Validates all 85 skills, 12 agent profiles, 5 workflows, and templates.
+Validates the skill catalog, agent profiles, workflows, and templates.
 """
 
 import os
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -19,8 +20,8 @@ class TestAgentsKit(unittest.TestCase):
 
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
-        skill_files = list(SKILLS_DIR.glob("**/SKILL.md"))
-        self.assertGreaterEqual(len(skill_files), 285, f"Expected at least 285 skills, found {len(skill_files)}")
+        skill_files = list(SKILLS_DIR.glob("*/*/SKILL.md"))
+        self.assertEqual(len(skill_files), 287, f"Expected 287 top-level skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -33,6 +34,23 @@ class TestAgentsKit(unittest.TestCase):
             frontmatter = parts[1]
             self.assertIn("name:", frontmatter, f"{rel_path} missing 'name:' in frontmatter")
             self.assertIn("description:", frontmatter, f"{rel_path} missing 'description:' in frontmatter")
+
+    def test_srs_skill_packages_are_self_contained(self):
+        planning = SKILLS_DIR / "planning-grilling"
+        spec_forge = planning / "spec-forge"
+        problem_based = planning / "problem-based-srs"
+        for required in (
+            spec_forge / "SKILL.md",
+            spec_forge / "skills" / "srs-generation" / "SKILL.md",
+            spec_forge / "skills" / "srs-generation" / "references" / "template.md",
+            spec_forge / "skills" / "shared" / "scripts" / "sf-trace.py",
+            spec_forge / "LICENSE",
+            problem_based / "SKILL.md",
+            problem_based / "reference" / "functional-requirements.md",
+            problem_based / "reference" / "validate.md",
+            problem_based / "LICENSE",
+        ):
+            self.assertTrue(required.is_file(), f"Missing SRS skill asset: {required}")
 
     def test_agent_profiles(self):
         """Ensure all 22 agent profiles exist and are valid markdown files."""
@@ -91,6 +109,14 @@ class TestAgentsKit(unittest.TestCase):
         for r in ref_files:
             self.assertGreater(r.stat().st_size, 400, f"{r.name} is too short or empty")
 
+    def test_frontend_skill_references_use_installed_path(self):
+        frontend_skills = (SKILLS_DIR / "frontend-mastery").glob("*/SKILL.md")
+        for skill_file in frontend_skills:
+            content = skill_file.read_text(encoding="utf-8")
+            self.assertNotIn("`references/frontend/", content, str(skill_file))
+            for reference in re.findall(r"`docs/(references/frontend/[^`]+)`", content):
+                self.assertTrue((KIT_DIR / reference).is_file(), reference)
+
     def test_skills_json_manifest(self):
         """Ensure universal skills.json manifest exists and indexes all skills."""
         manifest_path = KIT_DIR / "skills.json"
@@ -99,7 +125,7 @@ class TestAgentsKit(unittest.TestCase):
         with open(manifest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         self.assertIn("skills", data)
-        self.assertGreaterEqual(len(data["skills"]), 285)
+        self.assertEqual(len(data["skills"]), 287)
 
     def test_cli_add_command(self):
         """Ensure the 'agents-kit add' command is functional."""
@@ -107,6 +133,13 @@ class TestAgentsKit(unittest.TestCase):
         res = subprocess.run([str(KIT_DIR / "bin" / "agents-kit"), "add", "--help"], stdout=subprocess.PIPE, text=True)
         self.assertEqual(res.returncode, 0)
         self.assertIn("Import skills from a GitHub repository", res.stdout)
+
+    def test_doctor_does_not_claim_host_integration_is_verified(self):
+        import subprocess
+        res = subprocess.run([str(KIT_DIR / "bin" / "agents-kit"), "doctor"], capture_output=True, text=True)
+        self.assertEqual(res.returncode, 0)
+        self.assertIn("Codex/MCP integration not checked", res.stdout)
+        self.assertNotIn("100% HEALTHY", res.stdout)
 
 if __name__ == "__main__":
     unittest.main()

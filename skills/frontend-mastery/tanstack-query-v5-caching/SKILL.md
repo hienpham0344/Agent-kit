@@ -9,8 +9,8 @@ description: Advanced server state management with TanStack Query v5, Query Key 
 Manages asynchronous server data, background refetching, deduping, and optimistic cache mutations without replicating state.
 
 ## References & Cookbook
-- Detailed cookbook: `references/frontend/tanstack-query-v5-cookbook.md`
-- State matrix: `references/frontend/state-management-matrix.md`
+- Detailed cookbook: `docs/references/frontend/tanstack-query-v5-cookbook.md`
+- State matrix: `docs/references/frontend/state-management-matrix.md`
 
 ## Query Key Factory Standard
 ```typescript

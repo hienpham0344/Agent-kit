@@ -9,7 +9,7 @@ description: Complete WCAG 2.2 AA accessibility audit standards, ARIA 1.2 roles,
 Ensures digital accessibility for all users, fulfilling legal and ethical requirements while improving SEO and keyboard usability.
 
 ## Reference Checklist
-- Detailed audit checklist: `references/frontend/wcag-accessibility-audit-checklist.md`
+- Detailed audit checklist: `docs/references/frontend/wcag-accessibility-audit-checklist.md`
 
 ## Non-Negotiable Rules
 - Never use `outline: none` without a visible `:focus-visible` replacement.
