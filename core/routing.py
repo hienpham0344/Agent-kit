@@ -22,8 +22,9 @@ DECISION_NO_MATCH = "no_match"
 # example, a React dashboard does not need React email or React Native skills.
 GENERAL_NAME_TOKENS = {
     "api", "architecture", "boot", "design", "development", "engineering",
-    "frontend", "guide", "java", "js", "patterns", "pattern", "python",
-    "react", "security", "skill", "spring", "testing", "test", "ui", "ux",
+    "and", "automation", "builds", "cd", "ci", "frontend", "guide", "js",
+    "patterns", "pattern",
+    "react", "security", "skill", "testing", "test", "ui", "ux",
     "v2", "19",
 }
 UI_TASK_TERMS = ("giao dien", "dashboard", "responsive", "interface", "layout", "web page", "webpage", "ui")
@@ -85,7 +86,7 @@ class SkillRouter:
     ) -> RecommendationResult:
         stack_ctx = detect_project_stack(target_dir) if target_dir else None
         intent_res = extract_intents(task)
-        task_lower = task.lower()
+        task_lower = intent_res.normalized_text
         # 0. Check for casual chatter / negative queries / trivial queries
         chatter_markers = ["hello", "xin chao", "joke", "weather", "essay", "just testing", "thoi tiet"]
         trivial_markers = ["typo", "chinh ta", "rename variable", "doi ten bien", "copyright", "comment"]
@@ -122,8 +123,23 @@ class SkillRouter:
         scored: List[Tuple[float, SkillMetadata, List[str]]] = []
 
         all_intents = [intent_res.primary_intent] + intent_res.secondary_intents
+        database_performance_task = (
+            "database" in all_intents
+            and any(term in task_lower for term in ("cham", "slow", "toi uu", "optimize", "profil"))
+        )
+        ci_task = "devops" in all_intents and any(term in task_lower for term in ("ci", "cd", "pipeline"))
+
+        active_skills_dir = target_dir / ".agents" / "skills" if target_dir else None
+        active_names = None
+        if active_skills_dir and active_skills_dir.is_dir():
+            active_names = {
+                entry.name for entry in active_skills_dir.iterdir()
+                if entry.is_dir() and (entry / "SKILL.md").is_file()
+            }
 
         for skill in self.registry.list_all():
+            if active_names is not None and skill.name not in active_names:
+                continue
             score = 0.0
             reasons = []
 
@@ -136,11 +152,13 @@ class SkillRouter:
             broad_intent_match = (
                 ("debugging" in all_intents and skill.name in ("systematic-debugging", "debugging-strategies"))
                 or (ui_task and skill.name == "frontend-ui-engineering")
+                or (database_performance_task and skill.name == "database-query-profiling")
+                or (ci_task and skill.name == "ci-cd-and-automation")
             )
             explicit_match = any(alias.lower() in intent_res.normalized_text for alias in skill.aliases) or any(
                 trigger.lower() in intent_res.normalized_text for trigger in skill.triggers
             )
-            if specific_tokens and not specific_tokens.intersection(task_words) and not broad_intent_match and not explicit_match:
+            if not specific_tokens.intersection(task_words) and not broad_intent_match and not explicit_match:
                 continue
 
             if name_overlap:
@@ -150,6 +168,14 @@ class SkillRouter:
             if ui_task and skill.name == "frontend-ui-engineering":
                 score += 9.0
                 reasons.append("Task requests user interface implementation")
+
+            if database_performance_task and skill.name == "database-query-profiling":
+                score += 14.0
+                reasons.append("Task requests database query profiling")
+
+            if ci_task and skill.name == "ci-cd-and-automation":
+                score += 9.0
+                reasons.append("Task requests CI/CD configuration")
 
             for al in skill.aliases:
                 if al.lower() in intent_res.normalized_text:

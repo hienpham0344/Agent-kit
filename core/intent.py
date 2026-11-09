@@ -16,7 +16,7 @@ INTENT_PATTERNS: Dict[str, List[str]] = {
         "exception", "issue", "investigate", "stacktrace", "root cause",
         # Vietnamese
         "sua loi", "loi", "khong chay", "bi loi", "hong", "tim nguyen nhan", "dieu tra",
-        "truy vet", "khac phuc", "cham", "do", "bi crash", "ngoai le"
+        "truy vet", "khac phuc", "cham", "bi crash", "ngoai le"
     ],
     "testing": [
         "test", "testing", "unit test", "integration", "e2e", "tdd", "mock", "regression",
@@ -119,8 +119,8 @@ def extract_intents(task_description: str) -> IntentExtractionResult:
     raw = task_description.strip()
     norm_no_accents = remove_vietnamese_accents(raw)
     
-    # Combined search corpus (both original lowercased and stripped of accents)
-    corpus = f"{raw.lower()} {norm_no_accents}"
+    # Match one normalized corpus so accented Vietnamese does not score twice.
+    corpus = norm_no_accents
 
     # Extract tokens
     words = re.findall(r"\b[a-zA-Z0-9_\-\.]{2,}\b", norm_no_accents)
@@ -133,8 +133,6 @@ def extract_intents(task_description: str) -> IntentExtractionResult:
         for pat in patterns:
             if re.search(r"\b" + re.escape(pat) + r"\b", corpus):
                 score += 2.0
-            elif pat in corpus:
-                score += 1.0
         if score > 0:
             intent_scores[intent] = score
 

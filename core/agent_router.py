@@ -112,7 +112,7 @@ class AgentRouter:
         selected_skills: List[str],
         stack_context: Optional[Any] = None
     ) -> AgentRoutingResult:
-        task_lower = task.lower()
+        task_lower = intent_analysis.normalized_text
         all_intents = [intent_analysis.primary_intent] + intent_analysis.secondary_intents
         reasons = []
         warnings = []
@@ -129,6 +129,24 @@ class AgentRouter:
                 primary_agent=None,
                 secondary_agent=None,
                 reasons=["Trivial / non-engineering task detected. Executed directly by main agent to conserve tokens."]
+            )
+
+        # A specialist is useful when it can own a separate investigation or
+        # review. A technology match alone does not justify spawning an agent.
+        independent_work = "review" in all_intents or any(
+            marker in task_lower for marker in (
+                "investigate", "root cause", "phan tich", "nghien cuu",
+                "independent", "parallel", "song song", "doc lap",
+                "toan dien", "multi module", "nhieu module",
+            )
+        )
+        if not independent_work:
+            return AgentRoutingResult(
+                task=task,
+                delegation_policy=DELEGATION_NONE,
+                primary_agent=None,
+                secondary_agent=None,
+                reasons=["No independent specialist work identified; main agent handles the task."],
             )
 
         # 2. Score candidate agents based on capability & skill overlap

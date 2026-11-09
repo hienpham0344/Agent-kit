@@ -11,10 +11,79 @@ from core.registry import SkillRegistry
 from core.routing import SkillRouter
 from core.detection import detect_project_stack
 from core.orchestration import OrchestrationEngine
+from core.intent import extract_intents
+from core.agent_router import AgentRouter
 
 KIT_DIR = Path(__file__).resolve().parent.parent
 
 class TestSkillRouting(unittest.TestCase):
+
+    def test_vietnamese_dashboard_does_not_match_debugging_substring(self):
+        result = extract_intents("Tạo dashboard React có biểu đồ")
+        self.assertEqual(result.primary_intent, "feature")
+        self.assertNotIn("debugging", result.secondary_intents)
+
+    def test_vietnamese_typo_is_trivial(self):
+        result = self.router.recommend("Sửa lỗi chính tả trong README", top_k=5)
+        self.assertEqual(result.decision, "no_match")
+        self.assertEqual(result.recommendations, [])
+        agent_result = AgentRouter(KIT_DIR).route_agent(
+            "Sửa lỗi chính tả trong README", result.intent_analysis, [], None
+        )
+        self.assertEqual(agent_result.delegation_policy, "none")
+
+    def test_project_recommendations_use_only_active_skills(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            active = root / ".agents" / "skills"
+            active.mkdir(parents=True)
+            (active / "frontend-ui-engineering").symlink_to(
+                KIT_DIR / "skills" / "design-uiux" / "frontend-ui-engineering",
+                target_is_directory=True,
+            )
+            (active / "systematic-debugging").symlink_to(
+                KIT_DIR / "skills" / "engineering-core" / "systematic-debugging",
+                target_is_directory=True,
+            )
+            result = self.router.recommend("Tạo dashboard React có biểu đồ", target_dir=root)
+        self.assertEqual(
+            [item.skill.name for item in result.recommendations], ["frontend-ui-engineering"]
+        )
+
+    def test_database_query_routes_to_profiling(self):
+        result = self.router.recommend("Tối ưu truy vấn PostgreSQL chậm", top_k=3)
+        self.assertEqual(result.recommendations[0].skill.name, "database-query-profiling")
+
+    def test_docker_ci_does_not_suggest_expo(self):
+        result = self.router.recommend("Cấu hình Docker và CI/CD cho ứng dụng", top_k=5)
+        names = [item.skill.name for item in result.recommendations]
+        self.assertIn("docker-and-containerization", names)
+        self.assertIn("ci-cd-and-automation", names)
+        self.assertNotIn("expo-eas-ci-cd-builds", names)
+
+    def test_playwright_does_not_suggest_python_without_python_context(self):
+        result = self.router.recommend("Viết Playwright E2E test cho luồng đăng nhập", top_k=5)
+        names = [item.skill.name for item in result.recommendations]
+        self.assertIn("playwright-e2e-automation", names)
+        self.assertNotIn("python-testing-patterns", names)
+
+    def test_simple_feature_stays_in_main_agent(self):
+        result = self.router.recommend("Tạo dashboard React có biểu đồ", top_k=3)
+        routed = AgentRouter(KIT_DIR).route_agent(
+            result.task, result.intent_analysis,
+            [item.skill.name for item in result.recommendations], None,
+        )
+        self.assertEqual(routed.delegation_policy, "none")
+        self.assertIsNone(routed.primary_agent)
+
+    def test_independent_review_suggests_specialist(self):
+        result = self.router.recommend("Rà soát bảo mật API đăng nhập", top_k=3)
+        routed = AgentRouter(KIT_DIR).route_agent(
+            result.task, result.intent_analysis,
+            [item.skill.name for item in result.recommendations], None,
+        )
+        self.assertEqual(routed.delegation_policy, "specialist")
+        self.assertEqual(routed.primary_agent.id, "security_auditor")
 
     @classmethod
     def setUpClass(cls):
