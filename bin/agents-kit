@@ -10,6 +10,7 @@ import sys
 import argparse
 import shutil
 import glob
+import shlex
 from pathlib import Path
 
 # Add project root to sys.path
@@ -27,6 +28,7 @@ from core.orchestration import OrchestrationEngine
 from core.hosts.adapters import get_adapter, HOST_ADAPTERS
 from core.security import validate_skill_name, validate_safe_destination
 from core.cli import safe_run_subprocess
+from core.doctor import inspect_project
 
 SKILLS_DIR = KIT_DIR / "skills"
 AGENTS_DIR = KIT_DIR / "agents"
@@ -102,7 +104,7 @@ def cmd_install(args):
     print(f"   Operations: {len(plan.operations)} files planned")
     print("-" * 65)
 
-    if plan.has_conflicts and not args.force:
+    if plan.has_conflicts and not (args.force or args.backup):
         print("⚠️ File conflicts detected:")
         for op in plan.operations:
             if op.is_conflict:
@@ -140,7 +142,7 @@ def cmd_sync(args):
         args.preset = "auto"
         args.copy = False
         args.force = False
-        args.backup = True
+        args.backup = False
         args.dry_run = getattr(args, "dry_run", False)
         cmd_install(args)
         return
@@ -156,17 +158,17 @@ def cmd_sync(args):
         preset=manifest.preset,
         copy=(manifest.mode == "copy"),
         force=getattr(args, "force", False),
-        backup=getattr(args, "backup", True),
+        backup=getattr(args, "backup", False),
         categories=manifest.categories
     )
 
     plan = planner.plan()
-    if plan.has_conflicts and not getattr(args, "force", False):
+    if plan.has_conflicts and not (getattr(args, "force", False) or getattr(args, "backup", False)):
         print("⚠️ File conflicts detected during sync:")
         for op in plan.operations:
             if op.is_conflict:
                 print(f"   ❌ {op.dst.name}: {op.details}")
-        print("\n💡 Aborted sync to protect custom changes. Run with '--force' to overwrite or inspect manually.")
+        print("\n💡 Aborted sync to protect custom changes. Use '--backup' to preserve originals or inspect manually.")
         sys.exit(1)
 
     res = planner.execute(plan, dry_run=getattr(args, "dry_run", False))
@@ -352,6 +354,13 @@ def cmd_doctor(args):
         status = f"✅ INSTALLED ({loc})" if loc else "⚠️ NOT FOUND (Optional/Recommended)"
         print(f"  • {name:<22}: {status}")
 
+    cli_path = shutil.which("agents-kit")
+    expected_cli = KIT_DIR / "bin" / "agents-kit"
+    cli_status = "CURRENT KIT" if cli_path and Path(cli_path).resolve() == expected_cli else (
+        f"OTHER ({cli_path})" if cli_path else "NOT ON PATH (direct invocation still works)"
+    )
+    print(f"  • Agents-kit CLI on PATH : {cli_status}")
+
     print("\n🔍 Internal Kit Integrity:")
     registry = SkillRegistry(KIT_DIR)
     registry.load_catalog()
@@ -360,17 +369,64 @@ def cmd_doctor(args):
     recipe_count = len(list((WORKFLOWS_DIR / "recipes").glob("*.md")))
     template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
     ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
+    validation = registry.validate_registry()
 
     print(f"  • Total Skills Available    : {skill_count} (Expected: 287)")
     print(f"  • Agent Profile Files      : {agent_count} (Expected: 22)")
     print(f"  • Workflow Recipes         : {recipe_count} (Expected: 10)")
     print(f"  • Production Templates     : {template_count} (Expected: 18)")
     print(f"  • Reference Guides         : {ref_count} (Expected: 6)")
+    print(f"  • Missing skill dependencies: {len(validation.missing_dependencies)}")
+    print(f"  • Broken skill paths       : {len(validation.broken_paths)}")
+    print(f"  • Circular dependencies    : {len(validation.circular_dependencies)}")
 
-    if skill_count >= 287 and agent_count == 22 and recipe_count >= 10:
-        print("\nAgents-kit files present. Codex/MCP integration not checked.\n")
-    else:
-        print("\n⚠️ Agents-kit status: Some components missing.\n")
+    kit_healthy = (
+        skill_count >= 287 and agent_count >= 22 and recipe_count >= 10
+        and template_count >= 18 and ref_count >= 6
+        and not validation.missing_dependencies and not validation.broken_paths
+        and not validation.circular_dependencies
+    )
+
+    project = Path(args.project).expanduser().resolve()
+    health = inspect_project(project, KIT_DIR)
+    print(f"\n📁 Project installation: {project}")
+    print(f"  • Status                 : {health.status}")
+    print(f"  • Skills                 : {health.active_skills} active, {len(health.broken_skills)} broken")
+    print(f"  • Project AGENTS.md      : {'PRESENT' if health.instructions_present else 'MISSING'}")
+    for label, items in (
+        ("BROKEN skill", health.broken_skills),
+        ("MISSING managed skill", health.missing_skills),
+        ("MISSING managed file", health.missing_files),
+        ("MODIFIED managed file", health.modified_files),
+        ("INVALID managed path", health.invalid_paths),
+    ):
+        for item in items[:10]:
+            print(f"  • {label}: {item}")
+    if health.extra_skills:
+        print(f"  • Extra active skills     : {len(health.extra_skills)} (preserved)")
+
+    quoted_project = shlex.quote(str(project))
+    if health.status == "UNINSTALLED":
+        print(f"  • Next: agents-kit install {quoted_project} --preset auto --dry-run")
+    elif health.status == "UNMANAGED":
+        print(f"  • Next: agents-kit audit {quoted_project} (no manifest; do not sync blindly)")
+    elif health.status == "INVALID":
+        print("  • Next: inspect and back up the invalid .agents/agents-kit.manifest.json")
+    elif health.status == "INCOMPLETE":
+        print(f"  • Next: agents-kit audit {quoted_project}; manifest has no recorded skills")
+    elif health.broken_skills or health.missing_skills or health.missing_files or health.modified_files or health.invalid_paths:
+        print(f"  • Next: agents-kit audit {quoted_project}; review files before repair")
+
+    global_rules = Path.home() / ".codex" / "AGENTS.md"
+    routing_configured = global_rules.is_file() and "Automatic Agent-kit routing" in global_rules.read_text(
+        encoding="utf-8", errors="ignore"
+    )
+    print(f"\nCodex global routing policy: {'PRESENT' if routing_configured else 'NOT DETECTED'}")
+    print("Codex/MCP integration not checked (runtime invocation and handshake).")
+    if not kit_healthy:
+        print("⚠️ Agents-kit status: Some components missing.")
+    if not kit_healthy or not health.healthy:
+        sys.exit(1)
 
 def cmd_setup_env(args):
     bashrc = Path.home() / ".bashrc"
@@ -539,7 +595,8 @@ def main():
     subparsers = parser.add_subparsers(dest="command", required=True)
 
     subparsers.add_parser("list", help="List all curated skills, agents, and workflows")
-    subparsers.add_parser("doctor", help="Run system diagnostics and verify environment")
+    p_doc = subparsers.add_parser("doctor", help="Diagnose kit and project installation without changing files")
+    p_doc.add_argument("--project", default=".", help="Project directory to inspect (default: current directory)")
 
     # install
     p_inst = subparsers.add_parser("install", help="Install skills and agents into target project")
@@ -556,7 +613,7 @@ def main():
     p_sync.add_argument("target", nargs="?", default=".", help="Target project root directory")
     p_sync.add_argument("--dry-run", action="store_true", help="Show planned sync without modifying files")
     p_sync.add_argument("--force", action="store_true", help="Force overwrite on file conflicts")
-    p_sync.add_argument("--backup", action="store_true", default=True, help="Backup conflicting files")
+    p_sync.add_argument("--backup", action="store_true", help="Backup conflicting files before updating")
 
     # recommend
     p_rec = subparsers.add_parser("recommend", help="Recommend best skills for a user task")

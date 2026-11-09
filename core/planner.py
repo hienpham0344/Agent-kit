@@ -6,6 +6,7 @@ Respects user-created skills and unmanaged customizations.
 
 import os
 import shutil
+import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
@@ -178,12 +179,14 @@ class InstallationPlanner:
                     results["conflicts"] += 1
             return results
 
-        if plan.has_conflicts and not self.force:
-            raise RuntimeError("Installation aborted due to file conflicts. Use --force or inspect conflicts.")
+        if plan.has_conflicts and not (self.force or self.backup):
+            raise RuntimeError("Installation aborted due to file conflicts. Use --backup or inspect conflicts.")
 
-        backup_dir = self.target_dir / ".agents" / "backups"
+        backup_dir = None
         if self.backup:
-            backup_dir.mkdir(parents=True, exist_ok=True)
+            backup_root = self.target_dir / ".agents" / "backups"
+            backup_root.mkdir(parents=True, exist_ok=True)
+            backup_dir = Path(tempfile.mkdtemp(prefix="install-", dir=backup_root))
 
         managed_files = {}
         installed_skills = []
@@ -191,24 +194,29 @@ class InstallationPlanner:
         for op in plan.operations:
             if op.action == "unchanged":
                 results["unchanged"] += 1
+                if op.dst.parent.name == "skills" and (op.dst / "SKILL.md").is_file():
+                    installed_skills.append(op.dst.name)
                 if op.dst.is_file():
                     rel = str(op.dst.relative_to(self.target_dir))
                     managed_files[rel] = calculate_file_hash(op.dst)
                 continue
 
-            if op.is_conflict and not self.force:
+            if op.is_conflict and not (self.force or self.backup):
                 results["conflicts"] += 1
                 continue
 
             op.dst.parent.mkdir(parents=True, exist_ok=True)
 
             # Backup if requested
-            if self.backup and op.dst.exists():
-                b_path = backup_dir / (op.dst.name + ".bak")
-                if op.dst.is_file():
+            if self.backup and (op.dst.exists() or op.dst.is_symlink()):
+                b_path = backup_dir / op.dst.relative_to(self.target_dir)
+                b_path.parent.mkdir(parents=True, exist_ok=True)
+                if op.dst.is_symlink():
+                    b_path.symlink_to(os.readlink(op.dst))
+                elif op.dst.is_file():
                     shutil.copy2(op.dst, b_path)
-                elif op.dst.is_dir() and not op.dst.is_symlink():
-                    shutil.copytree(op.dst, b_path, dirs_exist_ok=True)
+                elif op.dst.is_dir():
+                    shutil.copytree(op.dst, b_path)
                 results["backed_up"] += 1
 
             # Perform write
