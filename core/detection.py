@@ -32,64 +32,76 @@ def detect_project_stack(target_path: Path) -> StackDetectionResult:
         result.recommended_preset = "minimal"
         return result
 
-    # Quick inspection of root files and top-level subdirectories (excluding heavy dirs)
+    # Inspect the root and immediate modules (common monorepo layout) only.
     try:
-        entries = [e.name for e in target_path.iterdir() if e.name not in EXCLUDE_DIRS]
+        candidates = [target_path] + [
+            entry for entry in target_path.iterdir()
+            if entry.is_dir() and entry.name not in EXCLUDE_DIRS
+        ]
+        entries_by_dir = {
+            directory: {entry.name for entry in directory.iterdir()}
+            for directory in candidates
+        }
     except Exception as e:
         result.explanation = f"Error reading directory: {e}"
         return result
 
     # 1. Java / JVM Markers
-    has_maven = "pom.xml" in entries
-    has_gradle = any(f in entries for f in ("build.gradle", "build.gradle.kts", "settings.gradle"))
-    if has_maven or has_gradle:
+    jvm_projects = [
+        (directory, names) for directory, names in entries_by_dir.items()
+        if "pom.xml" in names or names.intersection({"build.gradle", "build.gradle.kts", "settings.gradle"})
+    ]
+    if jvm_projects:
         result.detected_languages.append("java")
-        evidence = "pom.xml" if has_maven else "build.gradle"
-        result.evidence.append(f"JVM build system ({evidence})")
+        directory, names = jvm_projects[0]
+        marker = "pom.xml" if "pom.xml" in names else "build.gradle"
+        result.evidence.append(f"JVM build system ({(directory / marker).relative_to(target_path)})")
 
     # 2. Python Markers
-    has_pyproject = "pyproject.toml" in entries
-    has_requirements = "requirements.txt" in entries
-    has_setup_py = "setup.py" in entries
-    if has_pyproject or has_requirements or has_setup_py:
+    python_projects = [
+        (directory, names) for directory, names in entries_by_dir.items()
+        if names.intersection({"pyproject.toml", "requirements.txt", "setup.py"})
+    ]
+    if python_projects:
         result.detected_languages.append("python")
-        evidence = "pyproject.toml" if has_pyproject else ("requirements.txt" if has_requirements else "setup.py")
-        result.evidence.append(f"Python project ({evidence})")
+        directory, names = python_projects[0]
+        marker = next(name for name in ("pyproject.toml", "requirements.txt", "setup.py") if name in names)
+        result.evidence.append(f"Python project ({(directory / marker).relative_to(target_path)})")
 
     # 3. Node.js & Web Markers
-    if "package.json" in entries:
-        pkg_file = target_path / "package.json"
+    node_projects = [directory for directory, names in entries_by_dir.items() if "package.json" in names]
+    for directory in node_projects:
+        pkg_file = directory / "package.json"
         try:
             with open(pkg_file, "r", encoding="utf-8", errors="ignore") as f:
                 pkg_data = json.load(f)
             deps = {**pkg_data.get("dependencies", {}), **pkg_data.get("devDependencies", {})}
             
             # Framework inspection
-            if "next" in deps:
+            if "next" in deps and "nextjs" not in result.frameworks:
                 result.frameworks.append("nextjs")
-                result.evidence.append("Next.js framework in package.json")
-            if "react" in deps:
+                result.evidence.append(f"Next.js framework in {pkg_file.relative_to(target_path)}")
+            if "react" in deps and "react" not in result.frameworks:
                 result.frameworks.append("react")
-                result.evidence.append("React library in package.json")
-            if "vue" in deps:
+                result.evidence.append(f"React library in {pkg_file.relative_to(target_path)}")
+            if "vue" in deps and "vue" not in result.frameworks:
                 result.frameworks.append("vue")
-                result.evidence.append("Vue.js in package.json")
-            if "express" in deps or "fastify" in deps or "koa" in deps or "nestjs" in deps:
+                result.evidence.append(f"Vue.js in {pkg_file.relative_to(target_path)}")
+            if any(name in deps for name in ("express", "fastify", "koa", "nestjs")) and "node-backend" not in result.frameworks:
                 result.frameworks.append("node-backend")
-                result.evidence.append("Node.js server framework in package.json")
-
-            if any(f in result.frameworks for f in ("react", "nextjs", "vue")):
-                result.detected_languages.append("frontend")
-            elif "node-backend" in result.frameworks:
-                result.detected_languages.append("node")
-            else:
-                result.detected_languages.append("javascript/typescript")
-                result.evidence.append("Node.js package.json")
+                result.evidence.append(f"Node.js server framework in {pkg_file.relative_to(target_path)}")
         except Exception:
-            result.detected_languages.append("javascript/typescript")
-            result.evidence.append("package.json (unparsed)")
+            result.evidence.append(f"{pkg_file.relative_to(target_path)} (unparsed)")
+
+    if any(framework in result.frameworks for framework in ("react", "nextjs", "vue")):
+        result.detected_languages.append("frontend")
+    if "node-backend" in result.frameworks:
+        result.detected_languages.append("node")
+    if node_projects and not any(language in result.detected_languages for language in ("frontend", "node")):
+        result.detected_languages.append("javascript/typescript")
 
     # 4. Infrastructure / Container Markers
+    entries = entries_by_dir[target_path]
     if "Dockerfile" in entries or "docker-compose.yml" in entries or "docker-compose.yaml" in entries:
         result.infrastructure.append("docker")
         result.evidence.append("Docker containerization")
@@ -109,8 +121,8 @@ def detect_project_stack(target_path: Path) -> StackDetectionResult:
 
     if is_frontend and is_backend:
         # Fullstack project
-        categories.update(["design-uiux", "frontend-mastery", "architecture-domain", "security-threat", "stacks", "web-advanced-graphics"])
-        result.recommended_preset = "full"
+        categories.update(["design-uiux", "frontend-mastery", "architecture-domain", "security-threat", "stacks", "testing-performance"])
+        result.recommended_preset = "fullstack"
         result.confidence = 0.95
         result.explanation = f"Detected fullstack multi-language project: {', '.join(result.detected_languages)}."
     elif is_frontend:

@@ -6,6 +6,17 @@ Ensures 100% synchronization between README documentation, CLI help, and skills 
 from typing import Dict, List
 
 PRESETS: Dict[str, List[str]] = {
+    "fullstack": [
+        "planning-grilling",
+        "engineering-core",
+        "architecture-domain",
+        "design-uiux",
+        "security-threat",
+        "stacks",
+        "ops-guardrails",
+        "testing-performance",
+        "frontend-mastery",
+    ],
     "full": [
         "planning-grilling",
         "engineering-core",
@@ -69,7 +80,8 @@ PRESETS: Dict[str, List[str]] = {
 
 PRESET_DESCRIPTIONS: Dict[str, str] = {
     "auto": "Intelligently inspects project files to install stack-specific skills",
-    "full": "All 21 domains (285 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks)",
+    "fullstack": "Frontend and backend engineering without unrelated specialist domains",
+    "full": "All 21 domains (287 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks)",
     "web": "Frontend, UI/UX, Web APIs, and browser graphics",
     "backend": "Architecture, Domain modeling, JVM/Python/Node stacks, Security threats",
     "devops": "Cloud infrastructure, SRE observability, AWS/GCP/Azure, Ops guardrails",

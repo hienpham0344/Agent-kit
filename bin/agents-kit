@@ -242,7 +242,8 @@ def cmd_plan(args):
         args.task,
         primary_agent=primary_agent,
         secondary_agent=secondary_agent,
-        selected_skills=selected_skill_names
+        selected_skills=selected_skill_names,
+        project_dir=target,
     )
 
     if getattr(args, "json", False):
@@ -343,7 +344,7 @@ def cmd_doctor(args):
         "Git": "git",
         "Python 3": "python3",
         "Node.js": "node",
-        "Context Mode (MCP)": "context-mode",
+        "Context Mode CLI": "context-mode",
         "Docker": "docker"
     }
     for name, cmd in tools.items():
@@ -360,14 +361,14 @@ def cmd_doctor(args):
     template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
     ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 285)")
-    print(f"  • Configured Subagents     : {agent_count} (Expected: 22)")
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 287)")
+    print(f"  • Agent Profile Files      : {agent_count} (Expected: 22)")
     print(f"  • Workflow Recipes         : {recipe_count} (Expected: 10)")
     print(f"  • Production Templates     : {template_count} (Expected: 18)")
     print(f"  • Reference Guides         : {ref_count} (Expected: 6)")
 
-    if skill_count >= 285 and agent_count == 22 and recipe_count >= 10:
-        print("\n🎉 Agents-kit status: 100% HEALTHY & READY TO USE!\n")
+    if skill_count >= 287 and agent_count == 22 and recipe_count >= 10:
+        print("\nAgents-kit files present. Codex/MCP integration not checked.\n")
     else:
         print("\n⚠️ Agents-kit status: Some components missing.\n")
 
@@ -465,7 +466,7 @@ def cmd_export_skills_json(args):
         "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
         "name": "agents-kit",
         "version": "4.3.0",
-        "description": "Universal multi-stack engineering suite with 285 production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
+        "description": f"Universal multi-stack engineering suite with {len(skills_list)} production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
         "author": "Hien",
         "repository": "https://github.com/hienpham0344/Agent-kit",
         "total_skills": len(skills_list),

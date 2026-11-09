@@ -7,6 +7,7 @@ verification gates, and structured execution plans.
 from enum import Enum
 from dataclasses import dataclass, field
 from pathlib import Path
+import json
 from typing import List, Dict, Optional, Any, Set
 
 class TaskState(Enum):
@@ -96,7 +97,8 @@ class OrchestrationEngine:
         task: str,
         primary_agent: str = "main_agent",
         secondary_agent: Optional[str] = None,
-        selected_skills: Optional[List[str]] = None
+        selected_skills: Optional[List[str]] = None,
+        project_dir: Optional[Path] = None,
     ) -> OrchestrationPlan:
         """Decompose a high-level task into a dependency-aware plan with verification gates."""
         skills = selected_skills or []
@@ -107,7 +109,7 @@ class OrchestrationEngine:
             id="step-1-analysis",
             title="Analyze requirements & system design",
             assigned_agent="system_coordinator" if primary_agent != "main_agent" else "main_agent",
-            required_skills=[s for s in skills if "planning" in s or "architecture" in s] or ["systematic-debugging"],
+            required_skills=[s for s in skills if "planning" in s or "architecture" in s],
             dependencies=[]
         ))
 
@@ -118,7 +120,7 @@ class OrchestrationEngine:
             assigned_agent=primary_agent,
             required_skills=skills,
             dependencies=["step-1-analysis"],
-            verification_command="python3 -m unittest discover tests/"
+            verification_command=self._verification_command(project_dir)
         ))
 
         # Step 3: Independent QA or Security Review (if secondary agent assigned)
@@ -138,3 +140,25 @@ class OrchestrationEngine:
             delegation_summary=f"Primary: {primary_agent}" + (f", Reviewer: {secondary_agent}" if secondary_agent else "")
         )
         return plan
+
+    @staticmethod
+    def _verification_command(project_dir: Optional[Path]) -> Optional[str]:
+        """Suggest only a test command declared by the target project."""
+        if project_dir is None:
+            return None
+
+        package_file = project_dir / "package.json"
+        if package_file.is_file():
+            try:
+                package = json.loads(package_file.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                package = {}
+            if "test" in package.get("scripts", {}):
+                return "npm test"
+
+        for directory in (project_dir, project_dir / "backend"):
+            if (directory / "pom.xml").is_file():
+                command = "./mvnw test" if (directory / "mvnw").is_file() else "mvn test"
+                return command if directory == project_dir else f"cd backend && {command}"
+
+        return None

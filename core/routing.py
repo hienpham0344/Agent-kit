@@ -18,6 +18,16 @@ DECISION_RECOMMEND = "recommend"
 DECISION_CLARIFICATION = "clarification_required"
 DECISION_NO_MATCH = "no_match"
 
+# Framework names alone do not make a feature-specific skill relevant. For
+# example, a React dashboard does not need React email or React Native skills.
+GENERAL_NAME_TOKENS = {
+    "api", "architecture", "boot", "design", "development", "engineering",
+    "frontend", "guide", "java", "js", "patterns", "pattern", "python",
+    "react", "security", "skill", "spring", "testing", "test", "ui", "ux",
+    "v2", "19",
+}
+UI_TASK_TERMS = ("giao dien", "dashboard", "responsive", "interface", "layout", "web page", "webpage", "ui")
+
 @dataclass
 class SkillRecommendation:
     skill: SkillMetadata
@@ -108,6 +118,7 @@ class SkillRouter:
             )
 
         task_words = intent_res.tokens
+        ui_task = any(term in intent_res.normalized_text for term in UI_TASK_TERMS)
         scored: List[Tuple[float, SkillMetadata, List[str]]] = []
 
         all_intents = [intent_res.primary_intent] + intent_res.secondary_intents
@@ -121,9 +132,24 @@ class SkillRouter:
             skill_tokens = set(re.findall(r"\b[a-zA-Z0-9_]{2,}\b", skill_name_clean))
 
             name_overlap = task_words.intersection(skill_tokens)
+            specific_tokens = skill_tokens - GENERAL_NAME_TOKENS
+            broad_intent_match = (
+                ("debugging" in all_intents and skill.name in ("systematic-debugging", "debugging-strategies"))
+                or (ui_task and skill.name == "frontend-ui-engineering")
+            )
+            explicit_match = any(alias.lower() in intent_res.normalized_text for alias in skill.aliases) or any(
+                trigger.lower() in intent_res.normalized_text for trigger in skill.triggers
+            )
+            if specific_tokens and not specific_tokens.intersection(task_words) and not broad_intent_match and not explicit_match:
+                continue
+
             if name_overlap:
                 score += len(name_overlap) * 5.0
                 reasons.append(f"Name matched: {', '.join(name_overlap)}")
+
+            if ui_task and skill.name == "frontend-ui-engineering":
+                score += 9.0
+                reasons.append("Task requests user interface implementation")
 
             for al in skill.aliases:
                 if al.lower() in intent_res.normalized_text:
@@ -138,7 +164,7 @@ class SkillRouter:
 
             # 3. Multilingual Intent Matching
             if "debugging" in all_intents:
-                if skill.name in ("systematic-debugging", "debugging-strategies", "memory-leak-detection"):
+                if skill.name in ("systematic-debugging", "debugging-strategies"):
                     weight = 8.0 if intent_res.primary_intent == "debugging" else 4.0
                     score += weight
                     reasons.append("Task requests debugging/troubleshooting")
@@ -181,7 +207,10 @@ class SkillRouter:
                 score += len(desc_overlap) * 1.5
                 reasons.append(f"Description matches: {', '.join(list(desc_overlap)[:3])}")
 
-            if score >= min_score:
+            # Stack alignment can rank a relevant skill, but cannot make an
+            # otherwise unrelated skill eligible by itself.
+            task_relevant = any(not reason.startswith("Aligned with project") for reason in reasons)
+            if score >= min_score and task_relevant:
                 scored.append((score, skill, reasons))
 
         # Sort descending by score

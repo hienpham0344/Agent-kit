@@ -20,7 +20,7 @@ TAG_KEYWORDS: Dict[str, List[str]] = {
     "devops": ["docker", "kubernetes", "k8s", "terraform", "ci", "cd", "github actions", "helm", "aws", "gcp", "azure"],
     "security": ["security", "stride", "threat", "vulnerability", "auth", "owasp", "penetration", "secret", "sast", "jwt"],
     "testing": ["test", "tdd", "unit", "integration", "e2e", "playwright", "vitest", "fuzz"],
-    "debugging": ["debug", "tracing", "perf", "valgrind", "memory leak", "profiling", "sentry", "error", "root cause"],
+    "debugging": ["debug", "debugging", "tracing", "perf", "valgrind", "memory leak", "profiling", "sentry", "error", "root cause"],
     "ai-llm": ["llm", "rag", "agent", "prompt", "token", "vector", "embedding", "langgraph"]
 }
 
@@ -113,7 +113,7 @@ class SkillRegistry:
 
                 for tag, kw_list in TAG_KEYWORDS.items():
                     for kw in kw_list:
-                        if kw in searchable:
+                        if re.search(r"\b" + re.escape(kw) + r"\b", searchable):
                             tags.add(tag)
                             if tag in ("java", "python"):
                                 languages.add(tag)
