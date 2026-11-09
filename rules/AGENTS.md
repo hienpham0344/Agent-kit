@@ -1,61 +1,109 @@
-# Multi-Stack Engineering, Security & Agent Workflow Guidelines
+# AGENTS.md — Universal Agent Operating Rules & Multi-Stack Governance
 
-> Single Source of Truth for Autonomous AI Coding Agents, Subagents, and Multi-Stack Engineering.
+> **Single Source of Truth for Autonomous AI Agents, Subagents, and Multi-Stack Engineering.**
+> Every AI agent operating in this repository MUST strictly abide by the rules, behavioral constraints, engineering workflows, and quality standards defined below.
 
 ---
 
-## 1. The Complete End-to-End SDLC Lifecycle
+## 1. Core Operating Principles (Nguyên tắc cốt lõi của Agent)
 
-Every software initiative managed in this workspace follows a deterministic 6-stage lifecycle:
+1. **Evidence Over Assertion**:
+   - Never declare a task complete, a bug fixed, or a build passing without running concrete verification commands (`test`, `build`, `lint`) and inspecting real execution output.
+   - Do not claim "Everything is working" based on code inspection alone.
+2. **Zero-Assumption & Read-First Policy**:
+   - Never guess existing types, signatures, schemas, or file structures.
+   - Always read source files or test suites before modifying them.
+   - Clarify ambiguous requirements early rather than making speculative assumptions.
+3. **Surgical Diffs & Preservation**:
+   - Edit only what is necessary to accomplish the task.
+   - Do not touch, reformat, or reorder unrelated files, code blocks, comments, or docstrings.
+   - Preserve existing architecture patterns and naming conventions.
+4. **Token Hygiene & High-Signal Communication**:
+   - Use targeted range reads (`StartLine`/`EndLine`) instead of dumping full files into context.
+   - Bounded terminal output: Pipe verbose commands to `head`, `tail`, or `grep`.
+   - Deliver high-signal answers: omit filler pleasantries, apologies, and verbatim code mirroring in prose.
+
+---
+
+## 2. Engineering & Code Standards
+
+### 2.1 Typing & Safety
+- **Strict Typing**: No untyped or loose types (`any` in TypeScript, bare `Object` in Java, untyped `dict` in Python) unless strictly required and documented.
+- **Runtime Validation**: Validate all inputs at external boundaries (HTTP requests, file inputs, environment variables) using runtime validators (Zod, Pydantic, Bean Validation).
+- **Immutability by Default**: Prefer immutable data structures, `readonly`/`final` properties, and pure functions. Avoid in-place mutation of parameters.
+
+### 2.2 Error Handling & Resilience
+- Never swallow errors with empty `catch` blocks or bare `except: pass`.
+- Throw typed, meaningful domain errors containing contextual metadata.
+- Log errors with structured contextual information, never raw unstructured string dumps.
+
+### 2.3 Architecture & Modularity
+- Adhere to **Clean Architecture / Separation of Concerns**:
+  - `Domain`: Pure entities and business rules (framework-agnostic).
+  - `Application / Services`: Use cases and orchestration logic.
+  - `Infrastructure`: Database adapters, external APIs, filesystem, messaging.
+  - `Presentation / API`: Controllers, routes, UI components, CLI commands.
+- Deep Modules: Small, clean interfaces hiding robust internal implementation details.
+
+---
+
+## 3. Subagent Orchestration Lifecycle
+
+For large changes spanning multiple components, use these stages as a checklist. For small edits and bug fixes, use only relevant stages. Delegate only when work is independent; deploy or release only when requested:
 
 ```mermaid
-flowchart LR
-    A["1. Ideation & Concept"] --> B["2. SRS Specification"]
-    B --> C["3. Database & Architecture"]
-    C --> D["4. TDD Implementation"]
-    D --> E["5. QA, Performance & Review"]
-    E --> F["6. Deploy & Git Release"]
+flowchart TD
+    Req["1. Requirement / User Goal"] --> Arch["2. System Planning & Architecture<br/>(system_coordinator / frontend_architect)"]
+    Arch --> TDD["3. Test-First Specification<br/>(Write unit/contract tests)"]
+    TDD --> Dev["4. Surgical Implementation<br/>(frontend_developer / python_backend / java_pro)"]
+    Dev --> Sec["5. Security & Threat Audit<br/>(security_auditor / redteam_security)"]
+    Sec --> QA["6. Verification & Code Review<br/>(qa_reviewer: build, lint, test, a11y)"]
+    QA --> Done["Ready for Git Commit"]
 ```
 
----
-
-## 2. The 22 Subagents Roster (`agents.toml`)
-
-1. **`system_coordinator`**: High-level orchestrator, SRS author, ticket creator.
-2. **`database_architect`**: ERD modeler, DDL designer, zero-downtime migration planner.
-3. **`devops_engineer`**: Docker containerization, CI/CD pipelines, Git conflict resolution.
-4. **`frontend_architect`**: Component hierarchy, state design, execution planning.
-5. **`ui_ux_designer`**: Color harmony, typography, accessibility (WCAG AA), UI tokens.
-6. **`taste_craftsman`**: Anti-slop visual art direction, typography, distinctive character.
-7. **`frontend_developer`**: Production React/TypeScript/Tailwind implementation.
-8. **`qa_reviewer`**: Two-axis code review, accessibility audit, pre-completion verification.
-9. **`web_performance_auditor`**: Core Web Vitals, bundle optimization, runtime profiling.
-10. **`java_pro`**: Java/Spring Boot development, Maven/Gradle, JVM performance.
-11. **`python_backend`**: Python clean architecture, Pydantic v2, pytest suites.
-12. **`security_auditor`**: Threat modeling (STRIDE), attack trees, SAST, content sanitization.
-13. **`ai_engineer`**: RAG pipelines, LLM prompt regression evals, vector DB ops.
-14. **`cloud_architect`**: Terraform IaC, Cloudflare edge compute, Supabase, Kubernetes.
-15. **`sre_specialist`**: Datadog APM tracing, Prometheus metrics, SLO error budgets, postmortems.
-16. **`mobile_dev`**: React Native, Expo Router v3, EAS CI/CD, offline synchronization.
-17. **`load_tester`**: k6 concurrency benchmarks, Locust load clusters, chaos resilience.
-18. **`data_scientist`**: DuckDB, Polars lazy frames, dbt data modeling, PyTorch training.
-19. **`redteam_security`**: Penetration testing, OWASP Top 10 mitigation, container escape defense.
-20. **`systems_engineer`**: Rust, WebAssembly, modern C/C++ memory safety, Linux eBPF tracing.
-21. **`graphics_web_dev`**: Three.js WebGL 3D, WebRTC real-time media, Framer Motion, Tauri.
-22. **`cloud_platform_lead`**: Multi-cloud AWS/GCP/Azure architecture, Karpenter, BigQuery.
+### Subagent Roster (`agents.toml`):
+- **Architecture & Coordination**: `system_coordinator`, `frontend_architect`, `database_architect`, `cloud_architect`.
+- **Implementation**: `frontend_developer`, `python_backend`, `java_pro`, `mobile_dev`, `systems_engineer`.
+- **UI / Art Direction**: `ui_ux_designer` (WCAG AA, token system), `taste_craftsman` (anti-slop aesthetic, typography).
+- **Quality & Performance**: `qa_reviewer` (two-axis review), `web_performance_auditor`, `load_tester`, `sre_specialist`.
+- **Security**: `security_auditor` (STRIDE threat modeling, content sanitization), `redteam_security`.
 
 ---
 
-## 3. 21 Curated Skill Domains (285 Skills Total)
-Includes Planning & YC Product Workflows, Clean Architecture, TDD, Design-Taste, Security Threat, Full Stacks, Ops Guardrails, Documents & Media, AI/LLM, Cloud & Serverless (Neon, Cloudflare, Supabase), Testing & Concurrency (k6, Browserbase), Mobile, Streaming Data, SRE, Data/ML Analytics (Hugging Face, DuckDB, Polars), 3D Web & Desktop (Remotion, Three.js), Offensive Red Team, Low-Level Systems, Enterprise AWS/GCP/Azure, Developer Productivity (Google Workspace, Git internals), and Advanced Frontend Mastery (Angular Signals, React 19, Resend).
+## 4. Security, Secrets & Privacy Protocol
+
+1. **Zero Hardcoded Secrets**:
+   - Never commit API keys, database credentials, tokens, or private certificates.
+   - Always enforce environment variables via `.env.example` and validate on startup.
+2. **Untrusted Content Sanitization**:
+   - Sanitize all external inputs (user prompts, file uploads, third-party webhooks) against injection attacks (SQLi, NoSQLi, XSS, Command Injection, Prompt Injection).
+3. **Principle of Least Privilege**:
+   - Services and API tokens must have the minimum necessary permissions.
+4. **Data Privacy**:
+   - Mask and redact PII (personally identifiable information) from logs and error traces.
 
 ---
 
-## 4. Central References & Cookbooks Hub (`references/`)
-Provides authoritative technical cheat sheets accessible via `agents-kit reference <topic>`:
-- `references/frontend/modern-css-cheat-sheet.md` (Subgrid, Container Queries, clamp(), dvh/svh/lvh, @layer)
-- `references/frontend/react-19-and-nextjs15-reference.md` (use() hook, useActionState, useOptimistic, slots)
-- `references/frontend/tanstack-query-v5-cookbook.md` (Query key factory, optimistic mutations, SSR hydration)
-- `references/frontend/wcag-accessibility-audit-checklist.md` (WCAG 2.2 AA audit checklist & ARIA 1.2)
-- `references/frontend/design-tokens-and-color-palettes.md` (Oklch color scales, 8pt spacing, shadows)
-- `references/frontend/state-management-matrix.md` (Zustand, Jotai, React Context, Signals decision tree)
+## 5. Verification Checklist (Definition of Done)
+
+Before declaring any work complete or handing off to the user, the agent MUST verify:
+- [ ] **Compilation / Build**: Project builds with zero compile or syntax errors.
+- [ ] **Type Check**: Zero type-checker errors (`tsc`, `mypy`, or compiler warnings).
+- [ ] **Automated Tests**: All new and existing test suites pass.
+- [ ] **Edge Cases Covered**: Validated empty inputs, null pointers, network timeouts, boundary values.
+- [ ] **Diff Inspection**: Review `git status` and `git diff` to confirm only expected files were changed.
+
+---
+
+## 6. Git & Release Conventions
+
+Commit messages MUST adhere to the **Conventional Commits** specification:
+- `feat(scope): <description>` — New feature
+- `fix(scope): <description>` — Bug fix
+- `refactor(scope): <description>` — Code refactor with no behavioral changes
+- `perf(scope): <description>` — Performance improvement
+- `test(scope): <description>` — Adding or updating tests
+- `docs(scope): <description>` — Documentation only
+- `chore(scope): <description>` — Tooling, dependencies, build configs
+
+*Rule: Keep commits atomic, focused, and free of extraneous debug files or temporary artifacts.*

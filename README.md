@@ -7,7 +7,7 @@
 *Native compatibility with Google Antigravity, Claude Code, Cursor, Windsurf, and GitHub Copilot.*
 
 [![Version](https://img.shields.io/badge/Version-4.3.0-blue.svg?style=flat-square)](https://github.com/hienpham0344/Agent-kit)
-[![Skills](https://img.shields.io/badge/Skills-285%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
+[![Skills](https://img.shields.io/badge/Skills-287%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
 [![Domains](https://img.shields.io/badge/Domains-21%20Curated-blueviolet.svg?style=flat-square)](skills/)
 [![Subagents](https://img.shields.io/badge/Subagents-22%20Specialist%20Personas-purple.svg?style=flat-square)](agents/)
 [![Workflows](https://img.shields.io/badge/Workflows-10%20Runbooks-orange.svg?style=flat-square)](workflows/recipes/)
@@ -28,7 +28,7 @@
   <a href="#-the-6-stage-autonomous-sdlc"><b>SDLC Lifecycle</b></a> •
   <a href="#-the-22-specialist-subagents"><b>22 Subagents</b></a> •
   <a href="#-the-10-standard-runbooks"><b>10 Runbooks</b></a> •
-  <a href="#-21-skill-domains-catalog-285-skills"><b>285 Skills</b></a> •
+  <a href="#-21-skill-domains-catalog-287-skills"><b>287 Skills</b></a> •
   <a href="#-cli-suite--developer-tools"><b>CLI Tools</b></a> •
   <a href="#-token-hygiene-protocol"><b>Token Protocol</b></a> •
   <a href="#-faq"><b>FAQ</b></a>
@@ -46,12 +46,12 @@ When developers build complex software with AI assistants, generalist models oft
 
 With a single CLI command (`agents-kit install .`), Agents-Kit equips any codebase with:
 
-- 👥 **22 Specialized AI Subagents**: Dedicated engineering personas (Architects, Frontend, Backend, QA, SRE, Red Team, Cloud).
-- 📚 **285 Production Skills**: Deep, deterministic procedures across 21 technical domains (TDD, Pydantic v2, STRIDE, React 19, Neon, Resend, k6, Angular, Terraform).
+- 👥 **22 Agent Profiles**: Engineering role definitions for Agents-kit orchestration (Architects, Frontend, Backend, QA, SRE, Red Team, Cloud).
+- 📚 **287 Production Skills**: Deep, deterministic procedures across 21 technical domains (TDD, Pydantic v2, STRIDE, React 19, Neon, Resend, k6, Angular, Terraform).
 - 📖 **10 Production SDLC Runbooks**: Battle-tested recipes guiding your AI step-by-step from raw idea → IEEE 830 SRS → Schema Design → TDD Implementation → QA → YC-Style Launch.
 - 🌐 **Universal `skills.json` Spec**: Native interoperability with Vercel (`npx skills`) and Anthropic Claude ecosystems.
-- 🔌 **10 Integrated MCP Servers**: Sandbox execution, database schema profiling, Puppeteer UI diffs, Sentry triage, and container logs.
-- 🛡️ **Token Hygiene & Context-Mode Protocol**: Prevents context rot and saves **up to 98% of LLM context tokens** using sandboxed execution and precision slicing.
+- 🔌 **10 MCP Server Configurations**: Connection definitions for tools such as SQLite, GitHub, Puppeteer, Docker, and Sentry; each requires separate setup.
+- 🛡️ **Token Hygiene & Context-Mode Protocol**: Guidance for bounded output and targeted reads; Context Mode requires a working MCP connection.
 
 ### System Architecture
 
@@ -63,7 +63,7 @@ flowchart TD
         direction TB
         Squads["👥 22 Specialist Subagents<br/>(Architecture • Core Engineering • Security • QA • Cloud)"]
         Runbooks["📖 10 SDLC Runbooks<br/>(01-Feature • 02-Bugfix • 03-Refactor • 10-gstack Launch)"]
-        Skills["📚 285 Production Skills in 21 Domains<br/>(TDD • STRIDE • React 19 • Pydantic v2 • k6 • AWS)"]
+        Skills["📚 287 Production Skills in 21 Domains<br/>(TDD • STRIDE • React 19 • Pydantic v2 • k6 • AWS)"]
         MCP["🔌 10 MCP Servers & Tools<br/>(Context-Mode • SQLite • Docker • Sentry • AST Analyzer)"]
     end
 
@@ -135,11 +135,11 @@ cd /path/to/my-project
 ```bash
 # Method A: Auto-detected Stack (Recommended)
 # Intelligently inspects project markers (package.json, pom.xml, pyproject.toml, Dockerfile)
-# Automatically chooses the optimal preset with zero risk of over-installing full suite
+# Selects a preset from the detected project stack; preview it with --dry-run
 agents-kit install . --preset auto
 
 # Method B: Full Enterprise Suite
-# Installs all 285 skills, 22 subagents, 10 runbooks, 18 templates & 6 cookbooks
+# Installs all 287 skills, 22 subagents, 10 runbooks, 18 templates & 6 cookbooks
 agents-kit install . --preset full
 
 # Method C: Standalone Copy Mode (For Team Sharing & CI/CD)
@@ -159,9 +159,10 @@ agents-kit install . --preset auto --backup
 
 | Preset | Target Tech Stack | Curated Categories Included |
 | :--- | :--- | :--- |
-| `auto` *(Recommended)* | Auto-detected | Intelligently inspects project files (`package.json`, `pom.xml`, `pyproject.toml`, etc.) and selects `web`, `backend`, `devops`, or `minimal`. |
-| `full` | Enterprise Suite | **All 21 domains** (285 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks) |
-| `web` | Frontend & Fullstack | `planning-grilling`, `engineering-core`, `design-uiux`, `frontend-mastery`, `ops-guardrails`, `web-advanced-graphics`, `documents-media` |
+| `auto` *(Recommended)* | Auto-detected | Inspects project files (`package.json`, `pom.xml`, `pyproject.toml`, etc.) and selects `fullstack`, `web`, `backend`, `devops`, or `minimal`. |
+| `fullstack` | Frontend and backend | `planning-grilling`, `engineering-core`, `architecture-domain`, `design-uiux`, `security-threat`, `stacks`, `ops-guardrails`, `testing-performance`, `frontend-mastery` |
+| `full` | Enterprise Suite | **All 21 domains** (287 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks) |
+| `web` | Frontend web | `planning-grilling`, `engineering-core`, `design-uiux`, `frontend-mastery`, `ops-guardrails`, `web-advanced-graphics`, `documents-media` |
 | `backend` | Servers, APIs & DB | `planning-grilling`, `engineering-core`, `architecture-domain`, `security-threat`, `stacks`, `ops-guardrails` |
 | `devops` | Cloud & Infrastructure| `ops-guardrails`, `security-threat`, `cloud-infra`, `sre-observability`, `cloud-aws-gcp-azure`, `engineering-core` |
 | `security` | Red / Blue Team | `security-threat`, `security-redteam`, `ops-guardrails`, `engineering-core` |
@@ -195,7 +196,7 @@ Agents-Kit generates a clean, organized, standard layout inside your repository:
 my-project/
 ├── .agents/
 │   ├── agents.toml                 # Active registry for 22 specialized subagents
-│   └── skills/                     # 285 Symlinked (or copied) skill folders
+│   └── skills/                     # Selected skill folders (symlinked or copied)
 ├── AGENTS.md                       # Master engineering rules (Antigravity & Claude Code)
 ├── .cursorrules                    # Project rules natively read by Cursor IDE
 ├── .github/
@@ -212,11 +213,12 @@ my-project/
 
 ### 5. Step 4: AI IDE & Editor Activation
 
-How does your AI assistant automatically discover Agents-Kit? **No extra plugins or extensions required:**
+How does your AI assistant discover Agents-Kit? Skill files are local; external tools and MCP servers require separate setup:
 
 | AI Editor / Tool | Discovery Mechanism | What to Do Next |
 | :--- | :--- | :--- |
 | **Google Antigravity** | Automatically reads `.agents/agents.toml`, `.agents/skills/`, and `AGENTS.md` | Open project folder in Antigravity. Subagents and skills are immediately active. |
+| **Codex** | Reads `AGENTS.md` and discovers `.agents/skills/` | Open the project in Codex. `agents.toml` is an Agents-kit role registry; Codex custom agents require `.codex/agents/*.toml`. |
 | **Cursor IDE** | Automatically reads `.cursorrules` in project root | Open project in Cursor. Agent personas and rules are automatically loaded into Chat & Composer. |
 | **Claude Code (CLI)** | Automatically reads `AGENTS.md` in the current working directory | Run `claude` inside your project root. Prompt your agent with runbooks and skills. |
 | **Windsurf / Cascade** | Reads `AGENTS.md` and `.cursorrules` | Open workspace in Windsurf. Cascade inherits all behavioral guidelines. |
@@ -287,7 +289,7 @@ flowchart LR
 | Phase | Core Objective | Key Skills | Lead Subagent | Primary Output |
 | :--- | :--- | :--- | :--- | :--- |
 | **1. Ideation** | Discovery, technical grilling, and stress-testing | `brainstorming`, `idea-refine`, `grill-me`, `wait-what` | `system_coordinator` | Concept Brief & Scope |
-| **2. SRS** | Formal requirements (IEEE 830) & tracer-bullet tickets | `srs-authoring`, `to-spec`, `to-tickets`, `wayfinder` | `system_coordinator` | `docs/srs/SRS-*.md`, tickets |
+| **2. SRS** | Formal requirements (IEEE 830) & tracer-bullet tickets | `spec-forge`, `problem-based-srs`, `srs-authoring`, `to-spec`, `to-tickets`, `wayfinder` | `system_coordinator` | `docs/srs/SRS-*.md`, tickets |
 | **3. Architecture** | Relational & NoSQL modeling, ERDs, DDL schemas | `database-design`, `domain-modeling`, `codebase-design` | `database_architect` | `docs/database/*.md`, DDL |
 | **4. Coding** | Deep module architecture, TDD, and atomic edits | `test-driven-development`, `incremental-implementation` | `frontend_developer`, `python_backend` | Verified code + passing tests |
 | **5. QA & Audit** | Two-axis review, Web Vitals, accessibility, STRIDE, load | `verification-before-completion`, `k6-high-concurrency-testing` | `qa_reviewer`, `security_auditor` | Audit report & sign-off |
@@ -345,18 +347,20 @@ Deterministic, step-by-step engineering playbooks for human developers and auton
 
 ---
 
-## 📚 21 Skill Domains Catalog (285 Skills)
+## 📚 21 Skill Domains Catalog (287 Skills)
 
 Click on any domain to inspect its curated skills:
 
 <details>
-<summary><b>1. Planning, Grilling & SRS (11 Skills)</b> — <code>skills/planning-grilling/</code></summary>
+<summary><b>1. Planning, Grilling & SRS (13 Skills)</b> — <code>skills/planning-grilling/</code></summary>
 
 - `brainstorming`: You MUST use this before any creative work - creating features, building components, adding ...
 - `grill-me`: A relentless interview to sharpen a plan or design.
 - `grill-with-docs`: A relentless interview to sharpen a plan or design, which also creates docs (ADR's and gloss...
 - `gstack-product-launch-workflow`: Garry Tan / YC product engineering workflow: Think, Design, Build, QA, and Launch with ruthl...
 - `idea-refine`: Refines raw ideas into sharp, actionable concepts through structured divergent and convergen...
+- `problem-based-srs`: Trace customer problems through needs to testable requirements.
+- `spec-forge`: Create and review PRDs, SRS, technical designs, and test plans with traceability.
 - `srs-authoring`: Author comprehensive, industry-standard Software Requirements Specifications (SRS) based on ...
 - `to-spec`: Turn the current conversation into a spec and publish it to the project issue tracker: no in...
 - `to-tickets`: Break a plan, spec, or the current conversation into a set of tracer-bullet tickets, each de...
@@ -772,7 +776,7 @@ Agents-kit CLI v4.3.0
 agents-kit recommend "Debug Java Spring Boot auth failure with JWT" --explain
 agents-kit recommend "Build drag and drop animations in React" --project .
 
-# 2. Search across all 285 skills by keyword
+# 2. Search across all 287 skills by keyword
 agents-kit search "redis caching"
 agents-kit search "react 19"
 agents-kit search "neon branching"
@@ -789,7 +793,7 @@ agents-kit sync .
 agents-kit add supabase/agent-skills
 agents-kit add browserbase/skills --skill browserbase-cloud-automation
 
-# 6. Check environment & internal kit health (285 skills, 22 agents, 10 runbooks)
+# 6. Check environment & internal kit health (287 skills, 22 agents, 10 runbooks)
 agents-kit doctor
 
 # 7. Model Context Protocol (MCP) health verification & doctor
@@ -808,10 +812,10 @@ agents-kit reference
 agents-kit reference css
 agents-kit reference react
 
-# 11. Run automated test suite (12/12 tests PASS)
+# 11. Run automated test suite (18 tests PASS)
 agents-kit test
 
-# 12. Run skill quality and security linter across 285 skills
+# 12. Run skill quality and security linter across 287 skills
 python3 tools/skill_linter.py
 
 # 13. Run reproducible token savings benchmark
@@ -870,7 +874,7 @@ Agents-kit/
 ├── rules/
 │   ├── AGENTS.md            # Universal agent engineering instructions
 │   └── copilot-instructions.md # GitHub Copilot workspace directives
-├── skills/                  # 285 Production Skills across 21 Domains
+├── skills/                  # 287 Production Skills across 21 Domains
 │   ├── ai-llm/              # RAG, evals, vector ops, prompt caching
 │   ├── architecture-domain/ # Clean architecture, domain modeling, API design
 │   ├── cloud-aws-gcp-azure/ # AWS, GCP, Azure enterprise cloud patterns
@@ -919,11 +923,11 @@ python3 -m unittest discover tests/
 ```
 
 ```
-............
+..........................
 ----------------------------------------------------------------------
-Ran 12 tests in 0.974s
+Ran 25 tests
 
-OK (285 skills validated, 22 subagents verified, 10 recipes checked, 18 templates confirmed, 6 reference guides checked, skills.json verified, detection tested, routing verified, safety tested)
+OK
 ```
 
 ---
