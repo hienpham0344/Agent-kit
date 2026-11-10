@@ -7,7 +7,7 @@
 *Native compatibility with Google Antigravity, Claude Code, Cursor, Windsurf, and GitHub Copilot.*
 
 [![Version](https://img.shields.io/badge/Version-4.3.0-blue.svg?style=flat-square)](https://github.com/hienpham0344/Agent-kit)
-[![Skills](https://img.shields.io/badge/Skills-287%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
+[![Skills](https://img.shields.io/badge/Skills-290%20Production%20Grade-2ea44f.svg?style=flat-square)](skills/)
 [![Domains](https://img.shields.io/badge/Domains-21%20Curated-blueviolet.svg?style=flat-square)](skills/)
 [![Subagents](https://img.shields.io/badge/Subagents-22%20Specialist%20Personas-purple.svg?style=flat-square)](agents/)
 [![Workflows](https://img.shields.io/badge/Workflows-10%20Runbooks-orange.svg?style=flat-square)](workflows/recipes/)
@@ -28,7 +28,7 @@
   <a href="#-the-6-stage-autonomous-sdlc"><b>SDLC Lifecycle</b></a> •
   <a href="#-the-22-specialist-subagents"><b>22 Subagents</b></a> •
   <a href="#-the-10-standard-runbooks"><b>10 Runbooks</b></a> •
-  <a href="#-21-skill-domains-catalog-287-skills"><b>287 Skills</b></a> •
+  <a href="#-21-skill-domains-catalog-290-skills"><b>290 Skills</b></a> •
   <a href="#-cli-suite--developer-tools"><b>CLI Tools</b></a> •
   <a href="#-token-hygiene-protocol"><b>Token Protocol</b></a> •
   <a href="#-faq"><b>FAQ</b></a>
@@ -47,7 +47,7 @@ When developers build complex software with AI assistants, generalist models oft
 With a single CLI command (`agents-kit install .`), Agents-Kit equips any codebase with:
 
 - 👥 **22 Agent Profiles**: Engineering role definitions for Agents-kit orchestration (Architects, Frontend, Backend, QA, SRE, Red Team, Cloud).
-- 📚 **287 Production Skills**: Deep, deterministic procedures across 21 technical domains (TDD, Pydantic v2, STRIDE, React 19, Neon, Resend, k6, Angular, Terraform).
+- 📚 **290 Production Skills**: Deep, deterministic procedures across 21 technical domains (TDD, Pydantic v2, STRIDE, React 19, Neon, Resend, k6, Angular, Terraform, Avalanche/EVM).
 - 📖 **10 Production SDLC Runbooks**: Battle-tested recipes guiding your AI step-by-step from raw idea → IEEE 830 SRS → Schema Design → TDD Implementation → QA → YC-Style Launch.
 - 🌐 **Universal `skills.json` Spec**: Native interoperability with Vercel (`npx skills`) and Anthropic Claude ecosystems.
 - 🔌 **10 MCP Server Configurations**: Connection definitions for tools such as SQLite, GitHub, Puppeteer, Docker, and Sentry; each requires separate setup.
@@ -63,7 +63,7 @@ flowchart TD
         direction TB
         Squads["👥 22 Specialist Subagents<br/>(Architecture • Core Engineering • Security • QA • Cloud)"]
         Runbooks["📖 10 SDLC Runbooks<br/>(01-Feature • 02-Bugfix • 03-Refactor • 10-gstack Launch)"]
-        Skills["📚 287 Production Skills in 21 Domains<br/>(TDD • STRIDE • React 19 • Pydantic v2 • k6 • AWS)"]
+        Skills["📚 290 Production Skills in 21 Domains<br/>(TDD • STRIDE • React 19 • Pydantic v2 • k6 • AWS)"]
         MCP["🔌 10 MCP Servers & Tools<br/>(Context-Mode • SQLite • Docker • Sentry • AST Analyzer)"]
     end
 
@@ -142,7 +142,7 @@ cd /path/to/my-project
 agents-kit install . --preset auto
 
 # Method B: Full Enterprise Suite
-# Installs all 287 skills, 22 subagents, 10 runbooks, 18 templates & 6 cookbooks
+# Installs all 290 skills, 22 subagents, 10 runbooks, 18 templates & 6 cookbooks
 agents-kit install . --preset full
 
 # Method C: Standalone Copy Mode (For Team Sharing & CI/CD)
@@ -164,7 +164,7 @@ agents-kit install . --preset auto --backup
 | :--- | :--- | :--- |
 | `auto` *(Recommended)* | Auto-detected | Inspects project files (`package.json`, `pom.xml`, `pyproject.toml`, etc.) and selects `fullstack`, `web`, `backend`, `devops`, or `minimal`. |
 | `fullstack` | Frontend and backend | `planning-grilling`, `engineering-core`, `architecture-domain`, `design-uiux`, `security-threat`, `stacks`, `ops-guardrails`, `testing-performance`, `frontend-mastery` |
-| `full` | Enterprise Suite | **All 21 domains** (287 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks) |
+| `full` | Enterprise Suite | **All 21 domains** (290 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks) |
 | `web` | Frontend web | `planning-grilling`, `engineering-core`, `design-uiux`, `frontend-mastery`, `ops-guardrails`, `web-advanced-graphics`, `documents-media` |
 | `backend` | Servers, APIs & DB | `planning-grilling`, `engineering-core`, `architecture-domain`, `security-threat`, `stacks`, `ops-guardrails` |
 | `devops` | Cloud & Infrastructure| `ops-guardrails`, `security-threat`, `cloud-infra`, `sre-observability`, `cloud-aws-gcp-azure`, `engineering-core` |
@@ -354,7 +354,7 @@ Deterministic, step-by-step engineering playbooks for human developers and auton
 
 ---
 
-## 📚 21 Skill Domains Catalog (287 Skills)
+## 📚 21 Skill Domains Catalog (290 Skills)
 
 Click on any domain to inspect its curated skills:
 
@@ -431,7 +431,7 @@ Click on any domain to inspect its curated skills:
 </details>
 
 <details>
-<summary><b>5. Security & Threat Modeling (8 Skills)</b> — <code>skills/security-threat/</code></summary>
+<summary><b>5. Security & Threat Modeling (9 Skills)</b> — <code>skills/security-threat/</code></summary>
 
 - `attack-tree-construction`: Build comprehensive attack trees to visualize threat paths. Use when mapping attack scenario...
 - `external-content-sanitizer`: Treat retrieved webpages, files, issues, and tool outputs as untrusted; detect prompt inject...
@@ -439,13 +439,15 @@ Click on any domain to inspect its curated skills:
 - `security-and-hardening`: Hardens code against vulnerabilities. Use when auditing an input handler for vulnerabilities...
 - `security-requirement-extraction`: Derive security requirements from threat models and business context. Use when translating t...
 - `semgrep-custom-rule-authoring`: Authoring custom Static Application Security Testing (SAST) rules using Semgrep to detect ar...
+- `smart-contract-security-evm`: Use when auditing, threat-modeling, or hardening EVM smart contracts, escrow state machines...
 - `stride-analysis-patterns`: Apply STRIDE methodology to systematically identify threats. Use when analyzing system secur...
 - `threat-mitigation-mapping`: Map identified threats to appropriate security controls and mitigations. Use when prioritizi...
 </details>
 
 <details>
-<summary><b>6. Production Tech Stacks (9 Skills)</b> — <code>skills/stacks/</code></summary>
+<summary><b>6. Production Tech Stacks (10 Skills)</b> — <code>skills/stacks/</code></summary>
 
+- `avalanche-solidity-hardhat`: Use when writing, testing, compiling, or deploying Solidity smart contracts on Avalanche C-Ch...
 - `debugging-strategies`: Master systematic debugging techniques, profiling tools, and root cause analysis to efficien...
 - `error-handling-patterns`: Master error handling patterns across languages including exceptions, Result types, error pr...
 - `pydantic-v2`: Implement or review Pydantic v2 models, validation, serialization, settings, and schemas.
@@ -724,7 +726,7 @@ Click on any domain to inspect its curated skills:
 </details>
 
 <details>
-<summary><b>21. Advanced Frontend Mastery (22 Skills)</b> — <code>skills/frontend-mastery/</code></summary>
+<summary><b>21. Advanced Frontend Mastery (23 Skills)</b> — <code>skills/frontend-mastery/</code></summary>
 
 - `angular-signals-modern`: Modern Angular 18/19 architecture with Standalone components, reactive Signals, resource API...
 - `astro-island-architecture`: High-performance content sites with Astro Islands, partial hydration directives (client:load...
@@ -746,6 +748,7 @@ Click on any domain to inspect its curated skills:
 - `view-transitions-api`: Smooth page and element transitions using the native browser View Transitions API, cross-fad...
 - `vitest-react-testing-library`: Fast unit and integration component testing using Vitest, React Testing Library, user-event,...
 - `vue-3-composition-pinia`: Modern Vue 3 engineering with <script setup>, custom composables, Pinia state stores, and Ty...
+- `wagmi-viem-web3-frontend`: Use when building or debugging Avalanche or EVM frontend wallet flows, typed ABI contract re...
 - `web-accessibility-wcag-aria`: Complete WCAG 2.2 AA accessibility audit standards, ARIA 1.2 roles, focus management, and sc...
 - `zustand-state-management`: Lightweight, selector-optimized global client state management using Zustand, slices pattern...
 </details>
@@ -783,7 +786,7 @@ Agents-kit CLI v4.3.0
 agents-kit recommend "Debug Java Spring Boot auth failure with JWT" --explain
 agents-kit recommend "Build drag and drop animations in React" --project .
 
-# 2. Search across all 287 skills by keyword
+# 2. Search across all 290 skills by keyword
 agents-kit search "redis caching"
 agents-kit search "react 19"
 agents-kit search "neon branching"
@@ -800,7 +803,7 @@ agents-kit sync .
 agents-kit add supabase/agent-skills
 agents-kit add browserbase/skills --skill browserbase-cloud-automation
 
-# 6. Check environment & internal kit health (287 skills, 22 agents, 10 runbooks)
+# 6. Check environment & internal kit health (290 skills, 22 agents, 10 runbooks)
 agents-kit doctor
 
 # 7. Model Context Protocol (MCP) health verification & doctor
@@ -822,7 +825,7 @@ agents-kit reference react
 # 11. Run automated test suite (18 tests PASS)
 agents-kit test
 
-# 12. Run skill quality and security linter across 287 skills
+# 12. Run skill quality and security linter across 290 skills
 python3 tools/skill_linter.py
 
 # 13. Run reproducible token savings benchmark
@@ -881,7 +884,7 @@ Agents-kit/
 ├── rules/
 │   ├── AGENTS.md            # Universal agent engineering instructions
 │   └── copilot-instructions.md # GitHub Copilot workspace directives
-├── skills/                  # 287 Production Skills across 21 Domains
+├── skills/                  # 290 Production Skills across 21 Domains
 │   ├── ai-llm/              # RAG, evals, vector ops, prompt caching
 │   ├── architecture-domain/ # Clean architecture, domain modeling, API design
 │   ├── cloud-aws-gcp-azure/ # AWS, GCP, Azure enterprise cloud patterns

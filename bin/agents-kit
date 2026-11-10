@@ -371,7 +371,7 @@ def cmd_doctor(args):
     ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
     validation = registry.validate_registry()
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 287)")
+    print(f"  • Total Skills Available    : {skill_count} (Expected: 290)")
     print(f"  • Agent Profile Files      : {agent_count} (Expected: 22)")
     print(f"  • Workflow Recipes         : {recipe_count} (Expected: 10)")
     print(f"  • Production Templates     : {template_count} (Expected: 18)")
@@ -381,7 +381,7 @@ def cmd_doctor(args):
     print(f"  • Circular dependencies    : {len(validation.circular_dependencies)}")
 
     kit_healthy = (
-        skill_count >= 287 and agent_count >= 22 and recipe_count >= 10
+        skill_count >= 290 and agent_count >= 22 and recipe_count >= 10
         and template_count >= 18 and ref_count >= 6
         and not validation.missing_dependencies and not validation.broken_paths
         and not validation.circular_dependencies

@@ -21,7 +21,8 @@ TAG_KEYWORDS: Dict[str, List[str]] = {
     "security": ["security", "stride", "threat", "vulnerability", "auth", "owasp", "penetration", "secret", "sast", "jwt"],
     "testing": ["test", "tdd", "unit", "integration", "e2e", "playwright", "vitest", "fuzz"],
     "debugging": ["debug", "debugging", "tracing", "perf", "valgrind", "memory leak", "profiling", "sentry", "error", "root cause"],
-    "ai-llm": ["llm", "rag", "agent", "prompt", "token", "vector", "embedding", "langgraph"]
+    "ai-llm": ["llm", "rag", "agent", "prompt", "token", "vector", "embedding", "langgraph"],
+    "blockchain": ["blockchain", "avalanche", "fuji", "c-chain", "solidity", "hardhat", "foundry", "forge", "anvil", "evm", "smart contract", "wagmi", "viem", "web3", "web3j", "erc20", "escrow"]
 }
 
 @dataclass

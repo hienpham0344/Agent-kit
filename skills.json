@@ -2,10 +2,10 @@
   "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
   "name": "agents-kit",
   "version": "4.3.0",
-  "description": "Universal multi-stack engineering suite with 287 production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
+  "description": "Universal multi-stack engineering suite with 290 production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
   "author": "Hien",
   "repository": "https://github.com/hienpham0344/Agent-kit",
-  "total_skills": 287,
+  "total_skills": 290,
   "skills": [
     {
       "name": "agentic-memory-patterns",
@@ -536,7 +536,7 @@
       "path": "skills/design-uiux/browser-testing-with-devtools/SKILL.md"
     },
     {
-      "name": "brutalist-skill",
+      "name": "industrial-brutalist-ui",
       "description": "Raw mechanical interfaces fusing Swiss typographic print with military terminal aesthetics. Rigid grids, extreme type scale contrast, utilitarian color, analog degradation effects. For data-heavy dashboards, portfolios, or editorial sites that need to feel like declassified blueprints.",
       "category": "design-uiux",
       "path": "skills/design-uiux/brutalist-skill/SKILL.md"
@@ -560,19 +560,19 @@
       "path": "skills/design-uiux/frontend-ui-engineering/SKILL.md"
     },
     {
-      "name": "image-to-code-skill",
+      "name": "image-to-code",
       "description": "Elite website image-to-code skill for Codex. For visually important web tasks, it must first generate the design image(s) itself, deeply analyze them, then implement the website to match them as closely as possible. In Codex, it must prefer large, readable, section-specific images instead of tiny compressed boards, generate fresh standalone images for sections or detail views instead of cropping old ones, avoid lazy under-generation, avoid cards-inside-cards-inside-cards UI, and keep the hero clean, spacious, readable, and visible on a small laptop.",
       "category": "design-uiux",
       "path": "skills/design-uiux/image-to-code-skill/SKILL.md"
     },
     {
-      "name": "minimalist-skill",
+      "name": "minimalist-ui",
       "description": "Clean editorial-style interfaces. Warm monochrome palette, typographic contrast, flat bento grids, muted pastels. No gradients, no heavy shadows.",
       "category": "design-uiux",
       "path": "skills/design-uiux/minimalist-skill/SKILL.md"
     },
     {
-      "name": "output-skill",
+      "name": "full-output-enforcement",
       "description": "Overrides default LLM truncation behavior. Enforces complete code generation, bans placeholder patterns, and handles token-limit splits cleanly. Apply to any task requiring exhaustive, unabridged output.",
       "category": "design-uiux",
       "path": "skills/design-uiux/output-skill/SKILL.md"
@@ -584,13 +584,13 @@
       "path": "skills/design-uiux/performance-optimization/SKILL.md"
     },
     {
-      "name": "redesign-skill",
+      "name": "redesign-existing-projects",
       "description": "Upgrades existing websites and apps to premium quality. Audits current design, identifies generic AI patterns, and applies high-end design standards without breaking functionality. Works with any CSS framework or vanilla CSS.",
       "category": "design-uiux",
       "path": "skills/design-uiux/redesign-skill/SKILL.md"
     },
     {
-      "name": "soft-skill",
+      "name": "high-end-visual-design",
       "description": "Teaches the AI to design like a high-end agency. Defines the exact fonts, spacing, shadows, card structures, and animations that make a website feel expensive. Blocks all the common defaults that make AI designs look cheap or generic.",
       "category": "design-uiux",
       "path": "skills/design-uiux/soft-skill/SKILL.md"
@@ -723,7 +723,7 @@
     },
     {
       "name": "pptx",
-      "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user mentions \\\"deck,\\\" \\\"slides,\\\" \\\"presentation,\\\" or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. If a .pptx or .potx file needs to be opened, created, or touched, use this skill.",
+      "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user mentions \"deck,\" \"slides,\" \"presentation,\" or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. If a .pptx or .potx file needs to be opened, created, or touched, use this skill.",
       "category": "documents-media",
       "path": "skills/documents-media/pptx/SKILL.md"
     },
@@ -741,7 +741,7 @@
     },
     {
       "name": "xlsx",
-      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .xltx, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \\\"the xlsx in my downloads\\\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
+      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .xltx, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \"the xlsx in my downloads\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
       "category": "documents-media",
       "path": "skills/documents-media/xlsx/SKILL.md"
     },
@@ -956,6 +956,12 @@
       "path": "skills/frontend-mastery/vue-3-composition-pinia/SKILL.md"
     },
     {
+      "name": "wagmi-viem-web3-frontend",
+      "description": "Use when building or debugging Avalanche or EVM frontend wallet flows, typed ABI contract reads/writes, token approvals, or transaction receipts with wagmi, viem, and Next.js.",
+      "category": "frontend-mastery",
+      "path": "skills/frontend-mastery/wagmi-viem-web3-frontend/SKILL.md"
+    },
+    {
       "name": "web-accessibility-wcag-aria",
       "description": "Complete WCAG 2.2 AA accessibility audit standards, ARIA 1.2 roles, focus management, and screen reader verification.",
       "category": "frontend-mastery",
@@ -1160,7 +1166,7 @@
       "path": "skills/ops-guardrails/git-conflict-resolution/SKILL.md"
     },
     {
-      "name": "git-guardrails",
+      "name": "git-guardrails-claude-code",
       "description": "Set up Claude Code hooks to block dangerous git commands (push, reset --hard, clean, branch -D, etc.) before they execute. Use when user wants to prevent destructive git operations, add git safety hooks, or block git push/reset in Claude Code.",
       "category": "ops-guardrails",
       "path": "skills/ops-guardrails/git-guardrails/SKILL.md"
@@ -1430,6 +1436,12 @@
       "path": "skills/security-threat/semgrep-custom-rule-authoring/SKILL.md"
     },
     {
+      "name": "smart-contract-security-evm",
+      "description": "Use when auditing, threat-modeling, or hardening EVM smart contracts, escrow state machines, EIP-712 signatures, or backend blockchain receipt verification.",
+      "category": "security-threat",
+      "path": "skills/security-threat/smart-contract-security-evm/SKILL.md"
+    },
+    {
       "name": "stride-analysis-patterns",
       "description": "Apply STRIDE methodology to systematically identify threats. Use when analyzing system security, conducting threat modeling sessions, or creating security documentation.",
       "category": "security-threat",
@@ -1488,6 +1500,12 @@
       "description": "Progressive canary traffic shifting, blue/green deployments, automated metric analysis, and rollback with Argo Rollouts.",
       "category": "sre-observability",
       "path": "skills/sre-observability/zero-downtime-canary-deployments/SKILL.md"
+    },
+    {
+      "name": "avalanche-solidity-hardhat",
+      "description": "Use when writing, testing, compiling, or deploying Solidity smart contracts on Avalanche C-Chain or Fuji testnet with Hardhat, Foundry, OpenZeppelin, and viem.",
+      "category": "stacks",
+      "path": "skills/stacks/avalanche-solidity-hardhat/SKILL.md"
     },
     {
       "name": "debugging-strategies",

@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Set
 
 EXCLUDE_DIRS = {".git", "node_modules", ".venv", "venv", "dist", "build", "target", ".idea", ".vscode"}
+MONOREPO_CONTAINERS = {"apps", "packages", "services", "libs", "modules"}
 
 @dataclass
 class StackDetectionResult:
@@ -32,12 +33,18 @@ def detect_project_stack(target_path: Path) -> StackDetectionResult:
         result.recommended_preset = "minimal"
         return result
 
-    # Inspect the root and immediate modules (common monorepo layout) only.
+    # Inspect the root, immediate modules, and monorepo sub-packages (apps/*, packages/*).
     try:
-        candidates = [target_path] + [
+        top_dirs = [
             entry for entry in target_path.iterdir()
             if entry.is_dir() and entry.name not in EXCLUDE_DIRS
         ]
+        nested_dirs = [
+            sub for parent in top_dirs if parent.name in MONOREPO_CONTAINERS
+            for sub in parent.iterdir()
+            if sub.is_dir() and sub.name not in EXCLUDE_DIRS
+        ]
+        candidates = [target_path] + top_dirs + nested_dirs
         entries_by_dir = {
             directory: {entry.name for entry in directory.iterdir()}
             for directory in candidates
@@ -90,13 +97,28 @@ def detect_project_stack(target_path: Path) -> StackDetectionResult:
             if any(name in deps for name in ("express", "fastify", "koa", "nestjs")) and "node-backend" not in result.frameworks:
                 result.frameworks.append("node-backend")
                 result.evidence.append(f"Node.js server framework in {pkg_file.relative_to(target_path)}")
+            if any(name in deps for name in ("hardhat", "wagmi", "viem", "ethers", "@openzeppelin/contracts")) and "blockchain" not in result.frameworks:
+                result.frameworks.append("blockchain")
+                result.evidence.append(f"EVM/Web3 tooling in {pkg_file.relative_to(target_path)}")
         except Exception:
             result.evidence.append(f"{pkg_file.relative_to(target_path)} (unparsed)")
+
+    evm_projects = [
+        (directory, names) for directory, names in entries_by_dir.items()
+        if names.intersection({"hardhat.config.ts", "hardhat.config.js", "foundry.toml"})
+    ]
+    if evm_projects and "blockchain" not in result.frameworks:
+        result.frameworks.append("blockchain")
+        directory, names = evm_projects[0]
+        marker = next(name for name in ("hardhat.config.ts", "hardhat.config.js", "foundry.toml") if name in names)
+        result.evidence.append(f"Smart contracts ({(directory / marker).relative_to(target_path)})")
 
     if any(framework in result.frameworks for framework in ("react", "nextjs", "vue")):
         result.detected_languages.append("frontend")
     if "node-backend" in result.frameworks:
         result.detected_languages.append("node")
+    if "blockchain" in result.frameworks:
+        result.detected_languages.append("blockchain")
     if node_projects and not any(language in result.detected_languages for language in ("frontend", "node")):
         result.detected_languages.append("javascript/typescript")
 

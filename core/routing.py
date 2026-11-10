@@ -128,6 +128,7 @@ class SkillRouter:
             and any(term in task_lower for term in ("cham", "slow", "toi uu", "optimize", "profil"))
         )
         ci_task = "devops" in all_intents and any(term in task_lower for term in ("ci", "cd", "pipeline"))
+        blockchain_task = "blockchain" in intent_res.detected_technologies
 
         active_skills_dir = target_dir / ".agents" / "skills" if target_dir else None
         active_names = None
@@ -154,6 +155,7 @@ class SkillRouter:
                 or (ui_task and skill.name == "frontend-ui-engineering")
                 or (database_performance_task and skill.name == "database-query-profiling")
                 or (ci_task and skill.name == "ci-cd-and-automation")
+                or (blockchain_task and "blockchain" in skill.tags)
             )
             explicit_match = any(alias.lower() in intent_res.normalized_text for alias in skill.aliases) or any(
                 trigger.lower() in intent_res.normalized_text for trigger in skill.triggers

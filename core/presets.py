@@ -81,7 +81,7 @@ PRESETS: Dict[str, List[str]] = {
 PRESET_DESCRIPTIONS: Dict[str, str] = {
     "auto": "Intelligently inspects project files to install stack-specific skills",
     "fullstack": "Frontend and backend engineering without unrelated specialist domains",
-    "full": "All 21 domains (287 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks)",
+    "full": "All 21 domains (290 skills, 22 subagents, 10 runbooks, 18 templates, 6 cookbooks)",
     "web": "Frontend, UI/UX, Web APIs, and browser graphics",
     "backend": "Architecture, Domain modeling, JVM/Python/Node stacks, Security threats",
     "devops": "Cloud infrastructure, SRE observability, AWS/GCP/Azure, Ops guardrails",

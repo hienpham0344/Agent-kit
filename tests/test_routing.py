@@ -91,9 +91,9 @@ class TestSkillRouting(unittest.TestCase):
         cls.registry.load_catalog()
         cls.router = SkillRouter(KIT_DIR)
 
-    def test_registry_indexes_all_287_skills(self):
+    def test_registry_indexes_all_290_skills(self):
         count = self.registry.get_total_count()
-        self.assertEqual(count, 287)
+        self.assertEqual(count, 290)
 
         skill = self.registry.get_skill("systematic-debugging")
         self.assertIsNotNone(skill)
@@ -184,6 +184,25 @@ class TestSkillRouting(unittest.TestCase):
 
         self.assertEqual(plan.steps[0].required_skills, [])
         self.assertEqual(plan.steps[1].verification_command, "npm test")
+
+    def test_monorepo_fullstack_with_avalanche_contracts_and_routing(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            root = Path(temp_dir)
+            (root / "apps" / "api").mkdir(parents=True)
+            (root / "apps" / "api" / "pom.xml").write_text("<project/>")
+            (root / "apps" / "web").mkdir(parents=True)
+            (root / "apps" / "web" / "package.json").write_text('{"dependencies": {"next": "16.0.0", "react": "19.0.0", "wagmi": "3.0.0", "viem": "2.0.0"}}')
+            (root / "packages" / "contracts").mkdir(parents=True)
+            (root / "packages" / "contracts" / "hardhat.config.ts").write_text("export default {};")
+
+            detected = detect_project_stack(root)
+            rec = self.router.recommend("Deploy Solidity escrow contract on Avalanche Fuji and verify receipt", target_dir=root, top_k=5)
+
+        self.assertEqual(detected.recommended_preset, "fullstack")
+        self.assertIn("blockchain", detected.detected_languages)
+        names = [item.skill.name for item in rec.recommendations]
+        self.assertIn("avalanche-solidity-hardhat", names)
+        self.assertIn("smart-contract-security-evm", names)
 
 if __name__ == "__main__":
     unittest.main()

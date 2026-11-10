@@ -94,7 +94,20 @@ TECH_SYNONYMS: Dict[str, str] = {
     "duckdb": "duckdb",
     "k6": "k6",
     "playwright": "playwright",
-    "redis": "redis"
+    "redis": "redis",
+    "avalanche": "blockchain",
+    "fuji": "blockchain",
+    "solidity": "solidity",
+    "hardhat": "hardhat",
+    "foundry": "blockchain",
+    "forge": "blockchain",
+    "web3j": "blockchain",
+    "wagmi": "wagmi",
+    "viem": "viem",
+    "blockchain": "blockchain",
+    "smart contract": "blockchain",
+    "web3": "blockchain",
+    "evm": "blockchain"
 }
 
 def remove_vietnamese_accents(text: str) -> str:

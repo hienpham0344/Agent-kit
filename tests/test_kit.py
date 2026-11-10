@@ -21,7 +21,7 @@ class TestAgentsKit(unittest.TestCase):
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
         skill_files = list(SKILLS_DIR.glob("*/*/SKILL.md"))
-        self.assertEqual(len(skill_files), 287, f"Expected 287 top-level skills, found {len(skill_files)}")
+        self.assertEqual(len(skill_files), 290, f"Expected 290 top-level skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -125,7 +125,7 @@ class TestAgentsKit(unittest.TestCase):
         with open(manifest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         self.assertIn("skills", data)
-        self.assertEqual(len(data["skills"]), 287)
+        self.assertEqual(len(data["skills"]), 290)
 
     def test_cli_add_command(self):
         """Ensure the 'agents-kit add' command is functional."""
