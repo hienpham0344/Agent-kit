@@ -7,10 +7,84 @@ Provides consistency validation (missing dependencies, circular dependencies, br
 
 import os
 import re
-import yaml
+try:
+    import yaml  # type: ignore
+except ImportError:  # pragma: no cover - exercised in clean stdlib environments
+    yaml = None
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Set, Tuple
+
+
+def _strip_yaml_quotes(value: str) -> str:
+    value = value.strip()
+    if len(value) >= 2 and ((value[0] == '"' and value[-1] == '"') or (value[0] == "'" and value[-1] == "'")):
+        return value[1:-1]
+    return value
+
+
+def parse_frontmatter(fm_text: str) -> Dict[str, Any]:
+    """Parse YAML frontmatter using PyYAML when installed, or a pure-stdlib fallback."""
+    if yaml is not None:
+        loaded = yaml.safe_load(fm_text)
+        return loaded if isinstance(loaded, dict) else {}
+
+    result: Dict[str, Any] = {}
+    lines = fm_text.splitlines()
+    i = 0
+    while i < len(lines):
+        raw = lines[i]
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            i += 1
+            continue
+        if ":" not in raw or raw.startswith(" ") or raw.startswith("\t"):
+            i += 1
+            continue
+
+        key, rest = raw.split(":", 1)
+        key = key.strip()
+        rest = rest.strip()
+
+        if rest in ("|", ">", "|-", ">-"):
+            block_lines: List[str] = []
+            i += 1
+            while i < len(lines) and (lines[i].startswith(" ") or lines[i].startswith("\t") or not lines[i].strip()):
+                block_lines.append(lines[i].strip())
+                i += 1
+            joiner = "\n" if rest.startswith("|") else " "
+            result[key] = joiner.join(part for part in block_lines if part).strip()
+            continue
+
+        if rest == "":
+            # Possibly a bullet list or nested block on following indented lines
+            items: List[str] = []
+            j = i + 1
+            while j < len(lines):
+                nxt = lines[j]
+                if not nxt.strip():
+                    j += 1
+                    continue
+                if nxt.lstrip().startswith("- "):
+                    items.append(_strip_yaml_quotes(nxt.lstrip()[2:]))
+                    j += 1
+                elif nxt.startswith(" ") or nxt.startswith("\t"):
+                    j += 1
+                else:
+                    break
+            result[key] = items if items else ""
+            i = j
+            continue
+
+        if rest.startswith("[") and rest.endswith("]"):
+            inner = rest[1:-1].strip()
+            result[key] = [_strip_yaml_quotes(item) for item in inner.split(",") if item.strip()] if inner else []
+        else:
+            result[key] = _strip_yaml_quotes(rest)
+        i += 1
+    return result
+
+USING_PYYAML = yaml is not None
 
 TAG_KEYWORDS: Dict[str, List[str]] = {
     "java": ["java", "jvm", "spring", "maven", "gradle", "hibernate", "jpa"],
@@ -54,7 +128,7 @@ class RegistryValidationReport:
 
 class SkillRegistry:
     def __init__(self, kit_dir: Path):
-        self.kit_dir = kit_dir.resolve()
+        self.kit_dir = Path(kit_dir).resolve()
         self.skills_dir = self.kit_dir / "skills"
         self._skills: Dict[str, SkillMetadata] = {}
         self._aliases_map: Dict[str, str] = {}
@@ -96,11 +170,11 @@ class SkillRegistry:
                                 fm_lines.append(line)
                             fm_text = "".join(fm_lines)
                             try:
-                                loaded_yaml = yaml.safe_load(fm_text)
+                                loaded_yaml = parse_frontmatter(fm_text)
                                 if isinstance(loaded_yaml, dict):
                                     fm_data = loaded_yaml
-                                    name = fm_data.get("name", name)
-                                    desc = fm_data.get("description", "")
+                                    name = str(fm_data.get("name") or name)
+                                    desc = str(fm_data.get("description") or "")
                             except Exception:
                                 pass
                 except Exception:

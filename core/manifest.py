@@ -13,12 +13,14 @@ MANIFEST_FILENAME = "agents-kit.manifest.json"
 
 @dataclass
 class InstallationManifest:
-    version: str = "4.3.0"
+    version: str = "4.4.0"
     preset: str = "auto"
     mode: str = "symlink"
+    host: str = "antigravity"
     categories: List[str] = field(default_factory=list)
     installed_skills: List[str] = field(default_factory=list)
     managed_files: Dict[str, str] = field(default_factory=dict) # rel_path -> sha256 hash
+    kit_dir: str = ""
     timestamp: str = ""
 
 def calculate_file_hash(path: Path) -> str:
@@ -46,12 +48,15 @@ class ManifestManager:
             with open(self.manifest_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
             return InstallationManifest(
-                version=data.get("version", "4.3.0"),
+                version=data.get("version", "4.4.0"),
                 preset=data.get("preset", "auto"),
                 mode=data.get("mode", "symlink"),
+                host=data.get("host", "antigravity"),
                 categories=data.get("categories", []),
                 installed_skills=data.get("installed_skills", []),
-                managed_files=data.get("managed_files", {})
+                managed_files=data.get("managed_files", {}),
+                kit_dir=data.get("kit_dir", ""),
+                timestamp=data.get("timestamp", ""),
             )
         except Exception:
             return None
@@ -63,7 +68,9 @@ class ManifestManager:
         categories: List[str],
         installed_skills: List[str],
         managed_files: Any,
-        version: str = "4.3.0"
+        version: str = "4.4.0",
+        host: str = "antigravity",
+        kit_dir: str = "",
     ):
         self.manifest_path.parent.mkdir(parents=True, exist_ok=True)
         
@@ -81,9 +88,11 @@ class ManifestManager:
             version=version,
             preset=preset,
             mode=mode,
+            host=host,
             categories=categories,
             installed_skills=installed_skills,
             managed_files=file_hashes,
+            kit_dir=kit_dir,
             timestamp=now_utc
         )
 

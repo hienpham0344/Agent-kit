@@ -71,9 +71,49 @@ class AntigravityHostAdapter(BaseHostAdapter):
     def get_capabilities(self) -> Dict[str, str]:
         return {
             "skill_discovery": "Supported (native .agents/skills/ scan)",
-            "subagent_invocation": "Supported (subagent tools & live agents.toml)",
+            "subagent_invocation": "Supported (register roles via define_subagent / invoke_subagent using .agents/agents.toml blueprints)",
             "context_isolation": "Supported (branched/isolated workspaces)",
             "mcp_support": "Supported (native MCP server protocol)"
+        }
+
+class CodexHostAdapter(BaseHostAdapter):
+    @property
+    def host_name(self) -> str:
+        return "codex"
+
+    def generate_configs(self, skills: List[Path], copy: bool = False) -> List[str]:
+        created = []
+        skills_dest = self.target_dir / ".agents" / "skills"
+        skills_dest.mkdir(parents=True, exist_ok=True)
+
+        for s in skills:
+            dst = skills_dest / s.name
+            if dst.exists() or dst.is_symlink():
+                if dst.is_symlink():
+                    dst.unlink()
+                else:
+                    shutil.rmtree(dst)
+            if copy:
+                shutil.copytree(s, dst)
+            else:
+                dst.symlink_to(s)
+            created.append(str(dst))
+
+        agents_toml = self.target_dir / ".agents" / "agents.toml"
+        shutil.copy2(self.kit_dir / "agents" / "agents.toml", agents_toml)
+        created.append(str(agents_toml))
+
+        agents_md = self.target_dir / "AGENTS.md"
+        shutil.copy2(self.kit_dir / "rules" / "AGENTS.md", agents_md)
+        created.append(str(agents_md))
+        return created
+
+    def get_capabilities(self) -> Dict[str, str]:
+        return {
+            "skill_discovery": "Supported (native .agents/skills/ scan)",
+            "subagent_invocation": "Conditional (built-in roles or .codex/agents/ TOML profiles)",
+            "context_isolation": "Supported",
+            "mcp_support": "Supported"
         }
 
 class ClaudeCodeHostAdapter(BaseHostAdapter):
@@ -192,6 +232,7 @@ class WindsurfHostAdapter(BaseHostAdapter):
 
 HOST_ADAPTERS = {
     "antigravity": AntigravityHostAdapter,
+    "codex": CodexHostAdapter,
     "claude": ClaudeCodeHostAdapter,
     "copilot": CopilotHostAdapter,
     "cursor": CursorHostAdapter,

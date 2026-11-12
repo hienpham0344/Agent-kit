@@ -28,6 +28,7 @@ class InstallationPlan:
     preset: str
     mode: str
     categories: List[str]
+    host: str = "antigravity"
     operations: List[FileOperation] = field(default_factory=list)
     has_conflicts: bool = False
 
@@ -40,7 +41,8 @@ class InstallationPlanner:
         copy: bool = False,
         force: bool = False,
         backup: bool = False,
-        categories: Optional[List[str]] = None
+        categories: Optional[List[str]] = None,
+        host: str = "antigravity"
     ):
         self.kit_dir = kit_dir.resolve()
         self.target_dir = target_dir.resolve()
@@ -48,6 +50,7 @@ class InstallationPlanner:
         self.copy = copy
         self.force = force
         self.backup = backup
+        self.host = host.lower()
         self.manifest_mgr = ManifestManager(self.target_dir)
         self.existing_manifest = self.manifest_mgr.load_manifest()
 
@@ -58,34 +61,61 @@ class InstallationPlanner:
         else:
             self.categories = PRESETS.get("minimal", [])
 
+    def _skill_roots(self) -> List[Path]:
+        if self.host == "claude":
+            return [self.target_dir / ".claude" / "skills"]
+        if self.host == "all":
+            return [self.target_dir / ".agents" / "skills", self.target_dir / ".claude" / "skills"]
+        return [self.target_dir / ".agents" / "skills"]
+
+    def _host_configs(self) -> List[Tuple[Path, Path]]:
+        configs: List[Tuple[Path, Path]] = []
+        hosts = {"antigravity", "codex", "claude", "copilot", "cursor", "windsurf"} if self.host == "all" else {self.host}
+
+        if hosts.intersection({"antigravity", "codex"}):
+            configs.append((self.kit_dir / "agents" / "agents.toml", self.target_dir / ".agents" / "agents.toml"))
+            configs.append((self.kit_dir / "rules" / "AGENTS.md", self.target_dir / "AGENTS.md"))
+        if "claude" in hosts:
+            configs.append((self.kit_dir / "rules" / "AGENTS.md", self.target_dir / "CLAUDE.md"))
+        if "copilot" in hosts:
+            configs.append((self.kit_dir / "rules" / "copilot-instructions.md", self.target_dir / ".github" / "copilot-instructions.md"))
+            hook_src = self.kit_dir / "workflows" / "hooks" / "context-mode.json"
+            if hook_src.exists():
+                configs.append((hook_src, self.target_dir / ".github" / "hooks" / "context-mode.json"))
+        if "cursor" in hosts:
+            cursor_tmpl = self.kit_dir / "workflows" / "templates" / "CURSORRULES-TEMPLATE.md"
+            if cursor_tmpl.exists():
+                configs.append((cursor_tmpl, self.target_dir / ".cursorrules"))
+        if "windsurf" in hosts:
+            cursor_tmpl = self.kit_dir / "workflows" / "templates" / "CURSORRULES-TEMPLATE.md"
+            if cursor_tmpl.exists():
+                configs.append((cursor_tmpl, self.target_dir / ".windsurfrules"))
+        return configs
+
     def plan(self) -> InstallationPlan:
         plan = InstallationPlan(
             preset=self.preset,
             mode="copy" if self.copy else "symlink",
-            categories=self.categories
+            categories=self.categories,
+            host=self.host,
         )
 
-        # 1. Plan Skill Installations
-        target_skills_dir = self.target_dir / ".agents" / "skills"
+        # 1. Plan Skill Installations across host skill roots
         skills_dir = self.kit_dir / "skills"
+        for target_skills_dir in self._skill_roots():
+            for cat in self.categories:
+                cat_path = skills_dir / cat
+                if not cat_path.exists():
+                    continue
+                for s in sorted(cat_path.iterdir()):
+                    if s.is_dir() and (s / "SKILL.md").exists():
+                        dst = target_skills_dir / s.name
 
-        installed_skill_names = set()
-        for cat in self.categories:
-            cat_path = skills_dir / cat
-            if not cat_path.exists():
-                continue
-            for s in sorted(cat_path.iterdir()):
-                if s.is_dir() and (s / "SKILL.md").exists():
-                    dst = target_skills_dir / s.name
-                    installed_skill_names.add(s.name)
-                    
-                    if not dst.exists() and not dst.is_symlink():
-                        plan.operations.append(FileOperation(
-                            src=s, dst=dst, action="create", details="Install new skill"
-                        ))
-                    else:
-                        # Existing destination
-                        if dst.is_symlink():
+                        if not dst.exists() and not dst.is_symlink():
+                            plan.operations.append(FileOperation(
+                                src=s, dst=dst, action="create", details="Install new skill"
+                            ))
+                        elif dst.is_symlink():
                             try:
                                 link_target = dst.resolve()
                                 if link_target == s.resolve():
@@ -101,8 +131,6 @@ class InstallationPlanner:
                                     src=s, dst=dst, action="update", details="Fix broken symlink"
                                 ))
                         else:
-                            # dst is an actual directory
-                            # Check if it was previously managed or if it's a custom user skill
                             is_managed = (self.existing_manifest and s.name in self.existing_manifest.installed_skills)
                             if is_managed or self.force:
                                 plan.operations.append(FileOperation(
@@ -115,20 +143,8 @@ class InstallationPlanner:
                                 ))
                                 plan.has_conflicts = True
 
-        # 2. Plan Core Configuration Files
-        configs = [
-            (self.kit_dir / "agents" / "agents.toml", self.target_dir / ".agents" / "agents.toml"),
-            (self.kit_dir / "rules" / "AGENTS.md", self.target_dir / "AGENTS.md"),
-            (self.kit_dir / "rules" / "copilot-instructions.md", self.target_dir / ".github" / "copilot-instructions.md"),
-        ]
-
-        cursor_tmpl = self.kit_dir / "workflows" / "templates" / "CURSORRULES-TEMPLATE.md"
-        if cursor_tmpl.exists():
-            configs.append((cursor_tmpl, self.target_dir / ".cursorrules"))
-
-        hook_src = self.kit_dir / "workflows" / "hooks" / "context-mode.json"
-        if hook_src.exists():
-            configs.append((hook_src, self.target_dir / ".github" / "hooks" / "context-mode.json"))
+        # 2. Plan Host-Specific Core Configuration Files
+        configs = self._host_configs()
 
         for src, dst in configs:
             if not dst.exists():
@@ -227,7 +243,8 @@ class InstallationPlanner:
 
             if op.src:
                 if op.dst.parent.name == "skills":
-                    installed_skills.append(op.dst.name)
+                    if op.dst.name not in installed_skills:
+                        installed_skills.append(op.dst.name)
                     if self.copy:
                         shutil.copytree(op.src, op.dst)
                     else:
@@ -242,7 +259,7 @@ class InstallationPlanner:
             else:
                 results["updated"] += 1
 
-        # Also copy agent profiles, workflows, templates, references
+        # Also copy host-relevant agent profiles, workflows, templates, references
         self._copy_auxiliary_assets()
 
         # Save manifest
@@ -250,26 +267,29 @@ class InstallationPlanner:
             preset=self.preset,
             mode=plan.mode,
             categories=self.categories,
-            installed_skills=installed_skills,
-            managed_files=managed_files
+            installed_skills=sorted(set(installed_skills)),
+            managed_files=managed_files,
+            host=self.host,
+            kit_dir=str(self.kit_dir),
         )
 
         return results
 
     def _copy_auxiliary_assets(self):
-        """Install agent profiles, runbooks, templates, and reference guides."""
-        github_agents_dir = self.target_dir / ".github" / "agents"
+        """Install host-relevant agent profiles, runbooks, templates, and reference guides."""
+        if self.host in ("copilot", "all"):
+            github_agents_dir = self.target_dir / ".github" / "agents"
+            github_agents_dir.mkdir(parents=True, exist_ok=True)
+            for p in (self.kit_dir / "agents" / "profiles").glob("*.agent.md"):
+                shutil.copy2(p, github_agents_dir / p.name)
+
         docs_wf_dir = self.target_dir / "docs" / "workflows"
         docs_tmpl_dir = self.target_dir / "docs" / "templates"
         docs_ref_dir = self.target_dir / "docs" / "references"
 
-        github_agents_dir.mkdir(parents=True, exist_ok=True)
         docs_wf_dir.mkdir(parents=True, exist_ok=True)
         docs_tmpl_dir.mkdir(parents=True, exist_ok=True)
         docs_ref_dir.mkdir(parents=True, exist_ok=True)
-
-        for p in (self.kit_dir / "agents" / "profiles").glob("*.agent.md"):
-            shutil.copy2(p, github_agents_dir / p.name)
 
         for r in (self.kit_dir / "workflows" / "recipes").glob("*.md"):
             shutil.copy2(r, docs_wf_dir / r.name)
@@ -283,3 +303,43 @@ class InstallationPlanner:
             dst = docs_ref_dir / rel
             dst.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(rf, dst)
+
+
+def uninstall_managed(target_dir: Path, dry_run: bool = False) -> Dict[str, Any]:
+    """Safely uninstall only Agents-kit managed files and skills recorded in the manifest."""
+    target = target_dir.resolve()
+    mgr = ManifestManager(target)
+    manifest = mgr.load_manifest()
+    if not manifest:
+        return {"found": False, "removed_skills": 0, "removed_files": 0}
+
+    removed_skills = 0
+    removed_files = 0
+    skill_roots = [target / ".agents" / "skills", target / ".claude" / "skills"]
+
+    for skill_name in manifest.installed_skills:
+        for root in skill_roots:
+            dst = root / skill_name
+            if dst.is_symlink() or dst.exists():
+                removed_skills += 1
+                if not dry_run:
+                    if dst.is_symlink() or dst.is_file():
+                        dst.unlink(missing_ok=True)
+                    elif dst.is_dir():
+                        shutil.rmtree(dst)
+
+    for rel_path in manifest.managed_files:
+        p = (target / rel_path).resolve()
+        if p.is_relative_to(target) and (p.is_file() or p.is_symlink()):
+            removed_files += 1
+            if not dry_run:
+                p.unlink(missing_ok=True)
+
+    for aux in (target / "docs" / "workflows", target / "docs" / "templates", target / "docs" / "references"):
+        if aux.is_dir() and not dry_run:
+            shutil.rmtree(aux)
+
+    if not dry_run and mgr.manifest_path.exists():
+        mgr.manifest_path.unlink()
+
+    return {"found": True, "removed_skills": removed_skills, "removed_files": removed_files}
