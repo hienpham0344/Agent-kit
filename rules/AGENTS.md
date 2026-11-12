@@ -53,7 +53,9 @@ For each coding request, match its goal and project stack to the installed skill
 
 Handle small and sequential work in the main agent. For an independent specialist investigation or review with a clear deliverable, proactively delegate to a matching available subagent, with a narrow file scope and expected output. Wait for its result and summarize it. Do not spawn an agent merely to fill a fixed lifecycle stage. Use focused checks and bounded tool output to conserve context.
 
-`agents/agents.toml` is the Agents-kit role registry used by its CLI; it does not create Codex subagents. Codex uses available built-in agents or TOML profiles in `~/.codex/agents/` and `.codex/agents/`. If the host has no matching agent, continue in the main agent. Never assume a planned role was actually spawned.
+`agents/agents.toml` (and `.agents/agents.toml`) is the Agents-kit role blueprint registry; hosts do not auto-spawn subagents from TOML. In Antigravity, register roles on demand via `define_subagent` and `invoke_subagent` when independent delegation is warranted; in Codex, use built-in roles or TOML profiles in `~/.codex/agents/` and `.codex/agents/`. If the host has no matching agent, continue in the main agent. Never assume a planned role was actually spawned.
+
+If an `agensi` MCP connector is active, check `my_library` / `search_skills` alongside `.agents/skills/` during planning and specialized tasks.
 
 ---
 

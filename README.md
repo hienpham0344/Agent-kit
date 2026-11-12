@@ -91,30 +91,30 @@ Before starting, verify your environment meets the minimum requirements:
 
 ---
 
+> [!NOTE]
+> **Using an AI Agent to Install from GitHub?**
+> Point your AI assistant directly to [`BOOTSTRAP.md`](BOOTSTRAP.md) — a deterministic 4-step setup protocol (`clone -> doctor --json -> install --preset auto --host <host> -> doctor --project`).
+
 ### 2. Step 1: Clone Agents-Kit & Register Global CLI
 
-Clone the repository to a permanent location on your machine (e.g. `~/Project/Agents-kit`) and register the `agents-kit` command in your shell:
+Clone the repository to a permanent location on your machine (e.g. `~/Project/Agents-kit`) and register the `agents-kit` command in your shell (requires **Python 3.11+ stdlib only**, zero external pip dependencies required):
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/hienpham0344/Agent-kit.git ~/Project/Agents-kit
 cd ~/Project/Agents-kit
 
-# 2. Add executable to your shell PATH
-# Option A: For Bash (Ubuntu/Debian/Fedora):
-./bin/agents-kit setup-env
-source ~/.bashrc
-
-# Option B: For Zsh (macOS / Oh My Zsh):
-echo 'export PATH="'$PWD'/bin:$PATH"' >> ~/.zshrc
-source ~/.zshrc
+# 2. Add executable to your shell PATH (Bash/Zsh) or symlink ~/.local/bin
+./bin/agents-kit setup-env --symlink-bin
+# Or install via pipx / uv tool:
+# pipx install .   (or: uv tool install .)
 
 # 3. Verify health & dependency integrity
 agents-kit doctor
-agents-kit doctor --project /path/to/my-project
+agents-kit doctor --project /path/to/my-project --json
 ```
 
-`doctor` checks the kit catalog, executable availability, and the current project by default. Use `--project` to inspect another directory. It distinguishes `SOURCE`, `UNINSTALLED`, `UNMANAGED`, `MANAGED`, `INCOMPLETE`, and invalid manifests; it reports broken skill links, missing or modified managed files, and a safe next command. Diagnostics are read-only. A project with active skills but no manifest is `UNMANAGED`; inspect it with `agents-kit audit` before syncing. Codex runtime skill invocation and MCP handshakes are not verified by this command.
+`doctor` checks the kit catalog, executable availability, context-budget risk, MCP portability, and the target project. Use `--project` to inspect another directory, `--json` for machine-readable output, and `--fix` to safely repair broken skill symlinks. It distinguishes `SOURCE`, `UNINSTALLED`, `UNMANAGED`, `MANAGED`, `INCOMPLETE`, and invalid manifests. Diagnostics are read-only unless `--fix` is explicitly passed. Codex runtime skill invocation and MCP handshakes are not verified by this command.
 
 > [!TIP]
 > **No-PATH / One-Shot Alternative:**
@@ -220,12 +220,12 @@ How does your AI assistant discover Agents-Kit? Skill files are local; external 
 
 | AI Editor / Tool | Discovery Mechanism | What to Do Next |
 | :--- | :--- | :--- |
-| **Google Antigravity** | Automatically reads `.agents/agents.toml`, `.agents/skills/`, and `AGENTS.md` | Open project folder in Antigravity. Subagents and skills are immediately active. |
-| **Codex** | Reads `AGENTS.md` and discovers active `.agents/skills/` | Open the project in Codex and describe the task normally. A matching installed skill can be selected without naming it. `agents.toml` is an Agents-kit CLI role registry; Codex subagents require available built-in roles or TOML profiles in `.codex/agents/` or `~/.codex/agents/`. |
-| **Cursor IDE** | Automatically reads `.cursorrules` in project root | Open project in Cursor. Agent personas and rules are automatically loaded into Chat & Composer. |
-| **Claude Code (CLI)** | Automatically reads `AGENTS.md` in the current working directory | Run `claude` inside your project root. Prompt your agent with runbooks and skills. |
-| **Windsurf / Cascade** | Reads `AGENTS.md` and `.cursorrules` | Open workspace in Windsurf. Cascade inherits all behavioral guidelines. |
-| **GitHub Copilot** | Automatically reads `.github/copilot-instructions.md` | Open project in VS Code or JetBrains. Copilot Chat immediately follows project rules. |
+| **Google Antigravity** | Automatically reads `.agents/skills/` and `AGENTS.md` | Open project folder in Antigravity (`--host antigravity`). Skills and rules load automatically; subagent blueprints in `.agents/agents.toml` are registered on demand via `define_subagent` / `invoke_subagent`. |
+| **Codex** | Reads `AGENTS.md` and discovers active `.agents/skills/` | Install with `--host codex` and describe the task normally. A matching installed skill can be selected without naming it. `agents.toml` is a blueprint registry; Codex subagents require available built-in roles or TOML profiles in `.codex/agents/` or `~/.codex/agents/`. |
+| **Cursor IDE** | Automatically reads `.cursorrules` and `.agents/skills/` | Install with `--host cursor`. Agent rules are automatically loaded into Chat & Composer. |
+| **Claude Code (CLI)** | Automatically reads `CLAUDE.md` and `.claude/skills/` | Install with `--host claude` and run `claude` inside your project root. |
+| **Windsurf / Cascade** | Reads `.windsurfrules` and `.agents/skills/` | Install with `--host windsurf`. Cascade inherits all behavioral guidelines. |
+| **GitHub Copilot** | Automatically reads `.github/copilot-instructions.md` and `.github/agents/*.agent.md` | Install with `--host copilot` and open project in VS Code or JetBrains. |
 
 For consistent Codex behavior across projects, keep the short routing policy in `~/.codex/AGENTS.md`; installed projects also receive it through `rules/AGENTS.md`. Codex discovers active skills from `.agents/skills/` and selects them from their descriptions. `agents-kit recommend` and `agents-kit plan` are optional diagnostics; they print suggestions and do not invoke subagents. Delegation depends on the task, available agent roles, and host instructions. Subagents add their own token cost, so small or sequential tasks stay in the main agent.
 

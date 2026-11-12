@@ -15,10 +15,18 @@ Thumbs.db
 *.swp
 *~
 
-# Installed Agents-Kit artifacts in root
+# Installed Agents-Kit artifacts in root (keep .github/workflows and docs/{architecture,benchmarks,compatibility} trackable)
 /.agents/
 /.cursorrules
-/.github/
+/.windsurfrules
+/.github/agents/
+/.github/copilot-instructions.md
+/.github/hooks/
 /AGENTS.md
-/docs/
+/CLAUDE.md
+/docs/workflows/
+/docs/templates/
+/docs/references/
+dist/
+*.egg-info/
 
