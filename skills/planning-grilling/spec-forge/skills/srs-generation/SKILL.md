@@ -1,13 +1,8 @@
 ---
 name: srs-generation
 description: >
-  Generates professional Software Requirements Specification (SRS) documents based on IEEE 830,
-  ISO/IEC/IEEE 29148, and Amazon technical specification standards. This skill activates when the
-  user needs a requirements document, requirements specification, SRS, functional requirements,
-  non-functional requirements, software requirements, requirements analysis, or requirements
-  engineering. It formalizes product needs into structured, testable, and traceable requirements
-  with unique IDs, acceptance criteria, use cases, a CRUD matrix, and a full traceability matrix
-  linking back to the upstream PRD.
+  Generates IEEE 830 / ISO 29148 Software Requirements Specifications (SRS) with testable IDs,
+  acceptance criteria, use cases, CRUD matrix, and PRD traceability when writing requirements docs.
 instructions: >
   Generate a complete Software Requirements Specification following IEEE 830, ISO/IEC/IEEE 29148,
   and Amazon technical specification standards. Use the template at references/template.md and

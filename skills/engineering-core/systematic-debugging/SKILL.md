@@ -1,6 +1,9 @@
 ---
 name: systematic-debugging
 description: Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes
+triggers: [bug, failure, stack trace, exception, root cause, debug, error]
+risk_level: low
+required_tools: [read_file, grep, terminal]
 ---
 
 # Systematic Debugging

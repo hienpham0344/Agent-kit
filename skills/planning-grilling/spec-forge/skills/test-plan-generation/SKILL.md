@@ -1,15 +1,8 @@
 ---
 name: test-plan-generation
 description: >
-  Generates professional Test Plan and Test Cases documents following IEEE 829
-  test documentation standards, ISTQB testing methodologies, and Google Testing
-  Blog best practices. This skill activates when the user asks to write a test
-  plan, create test cases, draft a test plan document, create a test cases
-  document, define a test strategy, write a QA document, produce a testing
-  document, draft a test specification, or build a quality assurance plan. It
-  produces comprehensive, structured test documentation that ensures thorough
-  coverage, traceability to requirements, and a clear path from test design
-  through execution and defect management.
+  Generates IEEE 829 / ISTQB Test Plan and QA strategy documents ensuring requirement
+  traceability, coverage planning, execution, and defect management.
 instructions: >
   Generate Test Plan and Test Cases documents by combining the structural rigor
   of IEEE 829 test documentation, the methodology discipline of ISTQB test

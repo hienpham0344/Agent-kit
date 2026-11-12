@@ -1,11 +1,8 @@
 ---
 name: propagate
 description: >
-  Walk an upstream documentation change downstream — when a PRD, SRS, tech-design,
-  or feature spec is edited, find every dependent document, identify which sections
-  are now stale, and interactively update them to keep the entire doc chain
-  consistent. Use after editing any spec-forge document, or run periodically with
-  --since to catch accumulated drift.
+  Walk an upstream PRD, SRS, tech-design, or feature spec change downstream to identify stale
+  dependent sections and interactively keep the whole doc chain consistent (or audit via --since).
 ---
 
 # Spec Forge — Propagate

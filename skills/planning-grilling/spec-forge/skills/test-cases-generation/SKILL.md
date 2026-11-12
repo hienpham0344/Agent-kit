@@ -1,15 +1,8 @@
 ---
 name: test-cases-generation
 description: >
-  Generates structured test case sets with multi-dimensional coverage from project
-  code analysis or specification documents. This skill activates when the user asks
-  to write test cases, generate tests, supplement tests, create test coverage, or
-  improve test completeness. It auto-scans the project to extract testable units
-  (APIs, functions, components, CLI commands, tool definitions), identifies coverage
-  gaps, designs test cases across multiple dimensions (coverage depth, input types,
-  interaction patterns), and produces a structured test case document with coverage
-  matrix. Includes test strategy and methodology by default. Use --formal flag to
-  add management sections (environment, roles, schedule, defect management).
+  Generates multi-dimensional test case sets and coverage matrices by scanning project code or specs.
+  Supports --formal for test management sections when generating or supplementing test coverage.
 instructions: >
   Generate structured test case sets by scanning the project to extract testable
   units, identifying coverage gaps, designing multi-dimensional test cases, and

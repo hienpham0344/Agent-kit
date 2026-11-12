@@ -1,10 +1,8 @@
 ---
 name: audit
 description: >
-  Audit existing project documentation for quality, completeness, consistency, and code alignment.
-  Scans docs against the actual codebase to find stale references, missing coverage, internal
-  contradictions, and quality issues. Generates a structured findings report with severity levels
-  and actionable fix recommendations. Works on any project with a docs/ directory.
+  Audit project documentation against the codebase for completeness, consistency, stale references,
+  and contradictions, producing a prioritized findings report with actionable fixes.
 instructions: >
   Follow the workflow below exactly. This skill is analytical — it reads and evaluates existing
   documents, it does NOT generate new specification documents. The output is a findings report

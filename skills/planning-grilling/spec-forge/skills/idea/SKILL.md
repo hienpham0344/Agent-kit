@@ -1,12 +1,8 @@
 ---
 name: idea
 description: >
-  Use when exploring a new idea before writing formal specifications. Guides users through iterative
-  discovery, research, and critical analysis to crystallize vague ideas into validated requirement
-  drafts. Includes anti-pseudo-requirement checks, competitive research, demand evidence gathering,
-  and "What if we don't build this?" analysis. Supports pause/resume across sessions, stores ideas
-  in the project's ideas/ directory, and graduates validated ideas into the spec-forge auto
-  chain ([idea] → [decompose] → [prd] → srs → tech-design → review).
+  Use when exploring a new idea before formal specs. Guides discovery, demand validation, competitive
+  checks, and pause/resume in ideas/, graduating validated ideas into the spec-forge chain.
 instructions: >
   Follow the workflow below exactly. This is an interactive, multi-session skill.
   Ideas are stored in the project's ideas/ directory. By default, suggest adding ideas/

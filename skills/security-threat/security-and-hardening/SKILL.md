@@ -1,6 +1,9 @@
 ---
 name: security-and-hardening
-description: Hardens code against vulnerabilities. Use when auditing an input handler for vulnerabilities, when handling user input, authentication, data storage, or external integrations, or when checking a login flow is safe against the OWASP Top Ten. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services. Use when auditing dependencies for known vulnerabilities, triaging package-manager audit findings, or assessing supply-chain risk in a new package. Use when personal data or privacy compliance (GDPR, CCPA) is involved.
+description: Harden applications against OWASP Top 10 vulnerabilities, unsafe input handling, auth/session flaws, dependency supply-chain risks, and GDPR/CCPA privacy gaps.
+triggers: [security audit, owasp, hardening, vulnerability, auth flaw, input validation]
+risk_level: high
+required_tools: [read_file, grep, terminal]
 ---
 
 # Security and Hardening

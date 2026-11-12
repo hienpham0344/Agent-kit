@@ -1,10 +1,8 @@
 ---
 name: analyze
 description: >
-  Analyze a collection of documents to build a knowledge map, identify themes, find gaps, duplicates,
-  conflicts, and staleness, then produce an organized analysis with improvement recommendations.
-  Designed for document ecosystems (cross-repo docs, research collections, mixed-format doc repos)
-  where the challenge is understanding the landscape, not auditing against code.
+  Analyze a collection of documents to map themes, gaps, duplicates, conflicts, and staleness,
+  then produce an organized landscape analysis with improvement recommendations.
 instructions: >
   Follow the workflow below exactly. This skill is exploratory — it reads a collection of
   documents, builds a mental model of the landscape, and produces a structured analysis.

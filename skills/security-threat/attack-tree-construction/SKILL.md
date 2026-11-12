@@ -1,6 +1,9 @@
 ---
 name: attack-tree-construction
 description: Build comprehensive attack trees to visualize threat paths. Use when mapping attack scenarios, identifying defense gaps, or communicating security risks to stakeholders.
+triggers: [attack tree, threat path, attack scenario, defense gap]
+risk_level: medium
+required_tools: [read_file]
 ---
 
 # Attack Tree Construction

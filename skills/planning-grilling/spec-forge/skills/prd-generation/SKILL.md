@@ -1,12 +1,8 @@
 ---
 name: prd-generation
 description: >
-  Generates professional Product Requirements Documents (PRDs) following industry-standard
-  methodologies. This skill activates when the user asks to write PRD, create a product
-  requirements document, draft product requirements, do product planning, do feature planning,
-  write a product spec, or create a product document. It synthesizes best practices from
-  the Google PRD framework, the Amazon Working Backwards methodology, and the Stripe Product
-  Spec approach to produce comprehensive, actionable PRDs tailored to the user's project.
+  Generates actionable Product Requirements Documents (PRDs) combining Google PRD, Amazon Working
+  Backwards, and Stripe Product Spec practices when asked to write a PRD or product spec.
 instructions: >
   Generate PRDs by combining the structured rigor of Google PRD templates, the customer-centric
   narrative of Amazon Working Backwards, and the engineering-precision of Stripe Product Specs.

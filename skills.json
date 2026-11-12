@@ -1,7 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
   "name": "agents-kit",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "Universal multi-stack engineering suite with 290 production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
   "author": "Hien",
   "repository": "https://github.com/hienpham0344/Agent-kit",
@@ -525,7 +525,7 @@
     },
     {
       "name": "brandkit",
-      "description": "Premium brand-kit image generation skill for creating high-end brand-guidelines boards, logo systems, identity decks, and visual-world presentations. Trained for minimalist, cinematic, editorial, dark-tech, luxury, cultural, security, gaming, developer-tool, and consumer-app brand systems. Optimized for intentional logo concepting, refined composition, sparse typography, strong symbolic meaning, premium mockups, art-directed imagery, and flexible grid layouts.",
+      "description": "Brand-kit image generation for brand-guidelines boards, logo systems, identity decks, and visual-world presentations with intentional composition and minimal typography.",
       "category": "design-uiux",
       "path": "skills/design-uiux/brandkit/SKILL.md"
     },
@@ -549,7 +549,7 @@
     },
     {
       "name": "design-taste-frontend",
-      "description": "tasteskill v2, the anti-slop frontend skill. Art direction for websites, distilled from a study of 247 curated gallery sites (One Page Love, Awwwards Sites of the Day). Deals researched directions (idea, composition, type, palette, photographs, section blueprints) from a library, enforces a strict no-slop house style with a real-browser inspector, and runs a look-and-fix loop on screenshots. Use this whenever you build, design, redesign, restyle, polish or review a landing page, marketing site, portfolio, product page, one-pager, hero or any public-facing web page, in any stack (HTML/CSS, React, Next.js, Vue, Svelte, Astro, Tailwind) — also when the user says a page looks generic, templated, \"AI-made\", sloppy, or asks to make it look designed, premium, award-level or less like every other site. Not for dashboards or app screens.",
+      "description": "Anti-slop frontend art direction for landing pages, portfolios, marketing sites, and heroes. Applies researched typography, color palettes, composition blueprints, and browser visual QA. Not for dashboards.",
       "category": "design-uiux",
       "path": "skills/design-uiux/design-taste-frontend/SKILL.md"
     },
@@ -561,7 +561,7 @@
     },
     {
       "name": "image-to-code",
-      "description": "Elite website image-to-code skill for Codex. For visually important web tasks, it must first generate the design image(s) itself, deeply analyze them, then implement the website to match them as closely as possible. In Codex, it must prefer large, readable, section-specific images instead of tiny compressed boards, generate fresh standalone images for sections or detail views instead of cropping old ones, avoid lazy under-generation, avoid cards-inside-cards-inside-cards UI, and keep the hero clean, spacious, readable, and visible on a small laptop.",
+      "description": "Image-first website design-to-code workflow. Generates clean section reference imagery, analyzes layout hierarchy, and implements matching responsive frontend code without card bloat.",
       "category": "design-uiux",
       "path": "skills/design-uiux/image-to-code-skill/SKILL.md"
     },
@@ -597,13 +597,13 @@
     },
     {
       "name": "ui-styling",
-      "description": "Create beautiful, accessible user interfaces with shadcn/ui components (built on Radix UI + Tailwind), Tailwind CSS utility-first styling, and canvas-based visual designs. Use when building user interfaces, implementing design systems, creating responsive layouts, adding accessible components (dialogs, dropdowns, forms, tables), customizing themes and colors, implementing dark mode, generating visual designs and posters, or establishing consistent styling patterns across applications.",
+      "description": "Build accessible user interfaces using shadcn/ui (Radix UI + Tailwind CSS), utility-first styling, dark mode themes, and consistent design system tokens.",
       "category": "design-uiux",
       "path": "skills/design-uiux/ui-styling/SKILL.md"
     },
     {
       "name": "ui-ux-pro-max",
-      "description": "UI/UX design intelligence for web, mobile, and desktop. This skill should be used when designing, building, reviewing, or fixing interfaces, including pages, components, design systems, accessibility, interaction, responsive layout, typography, color, charts, and stack-specific UI implementation. Searchable local data: 79 searchable styles (50 active), 192 product palettes and reasoning profiles, 74 font pairings, 119 UX guidelines, 105 icons, 17 GSAP presets, 25 chart types, and 22 stacks.",
+      "description": "UI/UX design intelligence for web, mobile, and desktop: searchable styles, color palettes, font pairings, UX/accessibility guidelines, charts, and stack-specific UI patterns.",
       "category": "design-uiux",
       "path": "skills/design-uiux/ui-ux-pro-max/SKILL.md"
     },
@@ -711,19 +711,19 @@
     },
     {
       "name": "docx",
-      "description": "Use this skill whenever the user wants to create, read, edit, or manipulate Word documents (.docx files) or Word templates (.dotx files). Triggers include: any mention of 'Word doc', 'word document', '.docx', '.dotx', or requests to produce professional documents with formatting like tables of contents, headings, page numbers, or letterheads. Also use when extracting or reorganizing content from .docx or .dotx files, inserting or replacing images in documents, performing find-and-replace in Word files, working with tracked changes or comments, or converting content into a polished Word document. If the user asks for a 'report', 'memo', 'letter', 'template', or similar deliverable as a Word or .docx file, use this skill. Do NOT use for PDFs, spreadsheets, Google Docs, or general coding tasks unrelated to document generation.",
+      "description": "Create, read, edit, and manipulate Word (.docx/.dotx) documents, including TOC, headings, tables, images, tracked changes, and reports. Not for PDFs or spreadsheets.",
       "category": "documents-media",
       "path": "skills/documents-media/docx/SKILL.md"
     },
     {
       "name": "pdf",
-      "description": "Use this skill whenever the user wants to do anything with PDF files. This includes reading or extracting text/tables from PDFs, combining or merging multiple PDFs into one, splitting PDFs apart, rotating pages, adding watermarks, creating new PDFs, filling PDF forms, encrypting/decrypting PDFs, extracting images, and OCR on scanned PDFs to make them searchable. If the user mentions a .pdf file or asks to produce one, use this skill.",
+      "description": "Read, extract text/tables, merge, split, rotate, watermark, create, fill forms, encrypt/decrypt, and OCR .pdf files using Python and CLI tools.",
       "category": "documents-media",
       "path": "skills/documents-media/pdf/SKILL.md"
     },
     {
       "name": "pptx",
-      "description": "Use this skill any time a .pptx or .potx file is involved in any way — as input, output, or both. This includes: creating slide decks, pitch decks, or presentations; reading, parsing, or extracting text from any .pptx or .potx file (even if the extracted content will be used elsewhere, like in an email or summary); editing, modifying, or updating existing presentations; combining or splitting slide files; working with templates (.potx), layouts, speaker notes, or comments. Trigger whenever the user mentions \"deck,\" \"slides,\" \"presentation,\" or references a .pptx or .potx filename, regardless of what they plan to do with the content afterward. If a .pptx or .potx file needs to be opened, created, or touched, use this skill.",
+      "description": "Create, read, parse, edit, combine, or split PowerPoint (.pptx/.potx) slide decks, templates, layouts, speaker notes, and comments.",
       "category": "documents-media",
       "path": "skills/documents-media/pptx/SKILL.md"
     },
@@ -741,7 +741,7 @@
     },
     {
       "name": "xlsx",
-      "description": "Use this skill any time a spreadsheet file is the primary input or output. This means any task where the user wants to: open, read, edit, or fix an existing .xlsx, .xlsm, .xltx, .csv, or .tsv file (e.g., adding columns, computing formulas, formatting, charting, cleaning messy data); create a new spreadsheet from scratch or from other data sources; or convert between tabular file formats. Trigger especially when the user references a spreadsheet file by name or path — even casually (like \"the xlsx in my downloads\") — and wants something done to it or produced from it. Also trigger for cleaning or restructuring messy tabular data files (malformed rows, misplaced headers, junk data) into proper spreadsheets. The deliverable must be a spreadsheet file. Do NOT trigger when the primary deliverable is a Word document, HTML report, standalone Python script, database pipeline, or Google Sheets API integration, even if tabular data is involved.",
+      "description": "Create, read, edit, clean, and format spreadsheet files (.xlsx, .xlsm, .xltx, .csv, .tsv) with formulas, charts, and openpyxl/pandas workflows.",
       "category": "documents-media",
       "path": "skills/documents-media/xlsx/SKILL.md"
     },
@@ -1251,7 +1251,7 @@
     },
     {
       "name": "spec-forge",
-      "description": "Professional specification system for Codex. Use when the user asks to create, improve, review, audit, analyze, or propagate product/software documentation, including requirements documents to hand to an implementation team or vendor, SRS/functional/non-functional requirements, PRDs and business cases, ideas, technical designs, architecture/RFC docs, feature specs, test cases, documentation audits, document landscape analysis, and full idea-to-spec chains. The chain's spine is a delivery-grade requirements spec followed by a technical design, handed off to code-forge for implementation: [idea] -> [decompose] -> [prd] -> srs -> tech-design -> review.\n",
+      "description": "Specification system for creating, auditing, and propagating requirements docs (PRD, IEEE 830 SRS, tech design, feature specs, and test plans).",
       "category": "planning-grilling",
       "path": "skills/planning-grilling/spec-forge/SKILL.md"
     },
@@ -1419,7 +1419,7 @@
     },
     {
       "name": "security-and-hardening",
-      "description": "Hardens code against vulnerabilities. Use when auditing an input handler for vulnerabilities, when handling user input, authentication, data storage, or external integrations, or when checking a login flow is safe against the OWASP Top Ten. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services. Use when auditing dependencies for known vulnerabilities, triaging package-manager audit findings, or assessing supply-chain risk in a new package. Use when personal data or privacy compliance (GDPR, CCPA) is involved.",
+      "description": "Harden applications against OWASP Top 10 vulnerabilities, unsafe input handling, auth/session flaws, dependency supply-chain risks, and GDPR/CCPA privacy gaps.",
       "category": "security-threat",
       "path": "skills/security-threat/security-and-hardening/SKILL.md"
     },

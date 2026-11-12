@@ -1,6 +1,9 @@
 ---
 name: test-driven-development
 description: Use when implementing any feature or bugfix, before writing implementation code
+triggers: [tdd, unit test, test first, regression, feature, bugfix]
+risk_level: low
+required_tools: [read_file, write_file, terminal]
 ---
 
 # Test-Driven Development (TDD)

@@ -1,15 +1,6 @@
 ---
 name: spec-forge
-description: >
-  Professional specification system for Codex. Use when the user asks to create,
-  improve, review, audit, analyze, or propagate product/software documentation,
-  including requirements documents to hand to an implementation team or vendor,
-  SRS/functional/non-functional requirements, PRDs and business cases, ideas,
-  technical designs, architecture/RFC docs, feature specs, test cases,
-  documentation audits, document landscape analysis, and full idea-to-spec
-  chains. The chain's spine is a delivery-grade requirements spec followed by a
-  technical design, handed off to code-forge for implementation:
-  [idea] -> [decompose] -> [prd] -> srs -> tech-design -> review.
+description: Specification system for creating, auditing, and propagating requirements docs (PRD, IEEE 830 SRS, tech design, feature specs, and test plans).
 version: 1.0
 subcommands:
   - idea

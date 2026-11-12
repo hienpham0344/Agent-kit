@@ -1,6 +1,9 @@
 ---
 name: writing-plans
 description: Use when you have a spec or requirements for a multi-step task, before touching code
+triggers: [plan, implementation plan, roadmap, task breakdown, blueprint]
+risk_level: low
+required_tools: [read_file, write_file]
 ---
 
 # Writing Plans

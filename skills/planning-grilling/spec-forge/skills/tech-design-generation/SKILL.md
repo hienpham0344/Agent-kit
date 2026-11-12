@@ -1,13 +1,8 @@
 ---
 name: tech-design-generation
 description: >
-  Generates professional Technical Design Documents following industry-standard engineering
-  practices. This skill activates when the user asks to write a technical design, create an
-  architecture design, draft a design doc, write a technical proposal, do system design,
-  create a technical design document, write an RFC, create a design document, or produce an
-  architecture document. It synthesizes best practices from the Google Design Doc format,
-  the RFC template structure, and Uber/Meta engineering design standards to produce
-  comprehensive, implementable technical designs tailored to the user's project and codebase.
+  Generates Technical Design Documents and RFCs synthesizing Google Design Doc and Uber/Meta
+  architecture standards when asked to draft system design or technical proposals.
 instructions: >
   Generate Technical Design Documents by combining the structured decision-making of Google
   Design Docs, the formal rigor of RFC templates, and the engineering excellence of Uber/Meta

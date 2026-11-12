@@ -1,6 +1,9 @@
 ---
 name: srs-authoring
 description: Author comprehensive, industry-standard Software Requirements Specifications (SRS) based on IEEE 830 / ISO 29148. Use when the user asks to create an SRS, write software requirements, define functional/non-functional specifications, user stories with acceptance criteria, or build a complete product specification before coding.
+triggers: [srs, software requirements specification, functional requirements, acceptance criteria]
+risk_level: low
+required_tools: [read_file, write_file]
 ---
 
 # Software Requirements Specification (SRS) Authoring

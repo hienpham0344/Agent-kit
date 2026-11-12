@@ -1,6 +1,9 @@
 ---
 name: subagent-driven-development
 description: Use when executing implementation plans with independent tasks in the current session
+triggers: [subagent, delegate, multi-step plan, parallel implementation]
+risk_level: medium
+required_tools: [invoke_subagent, define_subagent, read_file]
 ---
 
 # Subagent-Driven Development
