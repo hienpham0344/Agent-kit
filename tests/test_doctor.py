@@ -121,6 +121,57 @@ class TestDoctor(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("INCOMPLETE", result.stdout)
 
+    def test_doctor_json_and_fix_mode(self):
+        import json
+        with tempfile.TemporaryDirectory() as temp_dir:
+            project = Path(temp_dir)
+            active = project / ".agents" / "skills"
+            active.mkdir(parents=True)
+            (active / "systematic-debugging").symlink_to(
+                project / "moved-kit" / "systematic-debugging",
+                target_is_directory=True,
+            )
+            ManifestManager(project).save_manifest(
+                preset="minimal", mode="symlink", categories=["engineering-core"],
+                installed_skills=["systematic-debugging"], managed_files=[],
+                host="antigravity", kit_dir=str(KIT_DIR),
+            )
+            broken_res = subprocess.run(
+                [str(CLI), "doctor", "--project", str(project), "--json"],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertNotEqual(broken_res.returncode, 0)
+            broken_data = json.loads(broken_res.stdout)
+            self.assertFalse(broken_data["health"]["healthy"])
+            self.assertIn("systematic-debugging", broken_data["health"]["broken_skills"])
+
+            dry_res = subprocess.run(
+                [str(CLI), "doctor", "--project", str(project), "--fix", "--dry-run", "--json"],
+                capture_output=True, text=True, check=False,
+            )
+            dry_data = json.loads(dry_res.stdout)
+            self.assertTrue(dry_data["repair"]["dry_run"])
+            self.assertIn("systematic-debugging", dry_data["repair"]["repaired_symlinks"])
+            self.assertFalse((active / "systematic-debugging" / "SKILL.md").is_file())
+
+            fix_res = subprocess.run(
+                [str(CLI), "doctor", "--project", str(project), "--fix", "--json"],
+                capture_output=True, text=True, check=False,
+            )
+            self.assertEqual(fix_res.returncode, 0)
+            fix_data = json.loads(fix_res.stdout)
+            self.assertTrue(fix_data["health"]["healthy"])
+            self.assertIn("systematic-debugging", fix_data["repair"]["repaired_symlinks"])
+            self.assertEqual(fix_data["health"]["context_budget_status"], "OK")
+
+    def test_context_budget_thresholds(self):
+        from core.doctor import _budget_status
+        from core.presets import CONTEXT_BUDGET_WARN, CONTEXT_BUDGET_CRITICAL
+        self.assertEqual(_budget_status(CONTEXT_BUDGET_WARN - 1), "OK")
+        self.assertEqual(_budget_status(CONTEXT_BUDGET_WARN), "WARN")
+        self.assertEqual(_budget_status(CONTEXT_BUDGET_CRITICAL - 1), "WARN")
+        self.assertEqual(_budget_status(CONTEXT_BUDGET_CRITICAL), "CRITICAL")
+
 
 if __name__ == "__main__":
     unittest.main()

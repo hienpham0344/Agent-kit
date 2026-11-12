@@ -4,16 +4,19 @@ Evaluates Precision@K, Recall@K, Top-1 Accuracy, and Latency across 50+ diverse 
 spanning Python, Java, React/Next.js, DevOps, Security, Vietnamese, English, and negative queries.
 """
 
+import sys
 import time
 import unittest
 from pathlib import Path
 from typing import List, Dict, Any
 
+KIT_DIR = Path(__file__).resolve().parent.parent
+if str(KIT_DIR) not in sys.path:
+    sys.path.insert(0, str(KIT_DIR))
+
 from core.routing import SkillRouter
 from core.agent_router import AgentRouter
 from core.intent import extract_intents
-
-KIT_DIR = Path(__file__).resolve().parent.parent
 
 BENCHMARK_DATASET: List[Dict[str, Any]] = [
     # 1. Java / Spring Boot (English & Vietnamese)

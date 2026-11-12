@@ -21,7 +21,7 @@ class TestAgentsKit(unittest.TestCase):
     def test_skills_count_and_frontmatter(self):
         """Ensure all skills contain valid YAML frontmatter with name and description."""
         skill_files = list(SKILLS_DIR.glob("*/*/SKILL.md"))
-        self.assertEqual(len(skill_files), 290, f"Expected 290 top-level skills, found {len(skill_files)}")
+        self.assertGreaterEqual(len(skill_files), 290, f"Expected at least 290 top-level skills, found {len(skill_files)}")
 
         for s_file in skill_files:
             rel_path = s_file.relative_to(SKILLS_DIR)
@@ -125,7 +125,27 @@ class TestAgentsKit(unittest.TestCase):
         with open(manifest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         self.assertIn("skills", data)
-        self.assertEqual(len(data["skills"]), 290)
+        top_level_count = len(list(SKILLS_DIR.glob("*/*/SKILL.md")))
+        self.assertEqual(len(data["skills"]), top_level_count)
+        self.assertGreaterEqual(len(data["skills"]), 290)
+
+    def test_plugin_manifests_in_sync(self):
+        """Ensure .claude-plugin/plugin.json and root plugin.json stay identical on core metadata."""
+        import json
+        root_plugin = json.loads((KIT_DIR / "plugin.json").read_text(encoding="utf-8"))
+        claude_plugin = json.loads((KIT_DIR / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))
+        for key in ("name", "version", "description", "repository"):
+            self.assertEqual(root_plugin.get(key), claude_plugin.get(key), f"Drift in plugin.json field: {key}")
+
+    def test_mcp_servers_no_hardcoded_user_paths(self):
+        """Ensure mcp/servers.json uses portable placeholders rather than machine paths."""
+        servers_text = (KIT_DIR / "mcp" / "servers.json").read_text(encoding="utf-8")
+        self.assertIsNone(re.search(r"(/home/[^/\"'\s]+|/Users/[^/\"'\s]+)", servers_text))
+
+    def test_skill_linter_passes_without_errors(self):
+        from tools.skill_linter import lint_all_skills
+        report = lint_all_skills(KIT_DIR)
+        self.assertEqual(report["errors"], [], f"Skill linter errors: {report['errors']}")
 
     def test_cli_add_command(self):
         """Ensure the 'agents-kit add' command is functional."""

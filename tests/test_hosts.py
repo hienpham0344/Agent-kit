@@ -12,6 +12,7 @@ from pathlib import Path
 from core.hosts.adapters import (
     AntigravityHostAdapter,
     ClaudeCodeHostAdapter,
+    CodexHostAdapter,
     CopilotHostAdapter,
     CursorHostAdapter,
     WindsurfHostAdapter,
@@ -41,6 +42,14 @@ class TestHostAdapters(unittest.TestCase):
         self.assertTrue((self.target / "AGENTS.md").exists())
         caps = adapter.get_capabilities()
         self.assertIn("Supported", caps["skill_discovery"])
+        self.assertIn("define_subagent", caps["subagent_invocation"])
+
+    def test_codex_adapter(self):
+        adapter = CodexHostAdapter(KIT_DIR, self.target)
+        adapter.generate_configs(self.sample_skills, copy=True)
+        self.assertTrue((self.target / ".agents" / "skills" / "systematic-debugging").exists())
+        self.assertTrue((self.target / "AGENTS.md").exists())
+        self.assertEqual(adapter.host_name, "codex")
 
     def test_claude_adapter(self):
         adapter = ClaudeCodeHostAdapter(KIT_DIR, self.target)
@@ -64,7 +73,7 @@ class TestHostAdapters(unittest.TestCase):
         self.assertTrue((self.target / ".windsurfrules").exists())
 
     def test_get_adapter_factory(self):
-        for name in ("antigravity", "claude", "copilot", "cursor", "windsurf"):
+        for name in ("antigravity", "codex", "claude", "copilot", "cursor", "windsurf"):
             ad = get_adapter(name, KIT_DIR, self.target)
             self.assertIsNotNone(ad)
             self.assertEqual(ad.host_name, name)

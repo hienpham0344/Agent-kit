@@ -93,7 +93,9 @@ class TestSkillRouting(unittest.TestCase):
 
     def test_registry_indexes_all_290_skills(self):
         count = self.registry.get_total_count()
-        self.assertEqual(count, 290)
+        expected = len(list((KIT_DIR / "skills").glob("*/*/SKILL.md")))
+        self.assertEqual(count, expected)
+        self.assertGreaterEqual(count, 290)
 
         skill = self.registry.get_skill("systematic-debugging")
         self.assertIsNotNone(skill)

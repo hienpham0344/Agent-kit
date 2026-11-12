@@ -1,0 +1,42 @@
+name: Agents-kit CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run unit & E2E test suite (zero external dependencies)
+        run: python3 -m unittest discover -s tests -p "test_*.py"
+
+      - name: Run routing accuracy benchmark
+        run: python3 tests/benchmark_routing.py
+
+      - name: Lint all skills & verify internal references
+        run: python3 tools/skill_linter.py
+
+      - name: Run kit doctor (JSON)
+        run: ./bin/agents-kit doctor --json
+
+      - name: Validate agent profiles
+        run: ./bin/agents-kit agents validate
+
+      - name: Verify MCP server catalog portability
+        run: ./bin/agents-kit mcp doctor --json
