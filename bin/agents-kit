@@ -17,9 +17,9 @@ from pathlib import Path
 KIT_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(KIT_DIR))
 
-from core.presets import PRESETS, PRESET_DESCRIPTIONS
+from core.presets import PRESETS, PRESET_DESCRIPTIONS, CONTEXT_BUDGET_WARN, CONTEXT_BUDGET_CRITICAL
 from core.detection import detect_project_stack
-from core.planner import InstallationPlanner
+from core.planner import InstallationPlanner, uninstall_managed
 from core.manifest import ManifestManager
 from core.registry import SkillRegistry
 from core.routing import SkillRouter
@@ -28,7 +28,7 @@ from core.orchestration import OrchestrationEngine
 from core.hosts.adapters import get_adapter, HOST_ADAPTERS
 from core.security import validate_skill_name, validate_safe_destination
 from core.cli import safe_run_subprocess
-from core.doctor import inspect_project
+from core.doctor import inspect_project, inspect_kit_environment, repair_project
 
 SKILLS_DIR = KIT_DIR / "skills"
 AGENTS_DIR = KIT_DIR / "agents"
@@ -71,8 +71,13 @@ def cmd_install(args):
         print(f"❌ Error: Target directory does not exist: {target}")
         sys.exit(1)
 
+    if target == KIT_DIR.resolve() and not args.force:
+        print(f"❌ Error: Refusing to install Agents-kit into its own source repository ({target}) without '--force'.")
+        sys.exit(1)
+
     preset = args.preset
     categories = None
+    host = getattr(args, "host", "antigravity")
 
     if not preset or preset == "auto":
         detection = detect_project_stack(target)
@@ -92,16 +97,23 @@ def cmd_install(args):
         copy=args.copy,
         force=args.force,
         backup=args.backup,
-        categories=categories
+        categories=categories,
+        host=host,
     )
 
     plan = planner.plan()
+    planned_skills = sum(1 for op in plan.operations if op.dst.parent.name == "skills")
 
     print(f"\n🚀 Agents-kit Installation Plan: {target}")
+    print(f"   Host:       {plan.host.upper()}")
     print(f"   Preset:     {plan.preset.upper()}")
     print(f"   Categories: {len(plan.categories)} ({', '.join(plan.categories)})")
     print(f"   Mode:       {plan.mode.upper()}")
-    print(f"   Operations: {len(plan.operations)} files planned")
+    print(f"   Operations: {len(plan.operations)} files planned ({planned_skills} skills)")
+    if planned_skills >= CONTEXT_BUDGET_CRITICAL:
+        print(f"   ⚠️ Context Budget CRITICAL: {planned_skills} skills may exceed AI host truncation limit (~190).")
+    elif planned_skills >= CONTEXT_BUDGET_WARN:
+        print(f"   ⚠️ Context Budget WARN: {planned_skills} skills planned; consider a focused preset if host truncates.")
     print("-" * 65)
 
     if plan.has_conflicts and not (args.force or args.backup):
@@ -132,7 +144,7 @@ def cmd_install(args):
         sys.exit(1)
 
 def cmd_sync(args):
-    """Synchronize project while preserving previous preset and copy/symlink mode."""
+    """Synchronize project while preserving previous preset, host, and copy/symlink mode."""
     target = Path(args.target).resolve()
     manifest_mgr = ManifestManager(target)
     manifest = manifest_mgr.load_manifest()
@@ -140,6 +152,7 @@ def cmd_sync(args):
     if not manifest:
         print(f"⚠️ No agents-kit installation manifest found in {target}. Falling back to 'auto' detection.")
         args.preset = "auto"
+        args.host = "antigravity"
         args.copy = False
         args.force = False
         args.backup = False
@@ -148,6 +161,7 @@ def cmd_sync(args):
         return
 
     print(f"\n🔄 Synchronizing existing project: {target}")
+    print(f"   Existing Host   : {manifest.host.upper()}")
     print(f"   Existing Preset : {manifest.preset.upper()}")
     print(f"   Existing Mode   : {manifest.mode.upper()}")
     print("-" * 65)
@@ -159,7 +173,8 @@ def cmd_sync(args):
         copy=(manifest.mode == "copy"),
         force=getattr(args, "force", False),
         backup=getattr(args, "backup", False),
-        categories=manifest.categories
+        categories=manifest.categories,
+        host=manifest.host,
     )
 
     plan = planner.plan()
@@ -339,20 +354,40 @@ def cmd_audit(args):
     print("-" * 65 + "\n")
 
 def cmd_doctor(args):
+    import json
+    project = Path(args.project).expanduser().resolve()
+    env_info = inspect_kit_environment(KIT_DIR)
+    repair_res = None
+    if getattr(args, "fix", False):
+        repair_res = repair_project(project, KIT_DIR, dry_run=getattr(args, "dry_run", False))
+
+    health = inspect_project(project, KIT_DIR)
+    kit_healthy = env_info["kit_healthy"] and not env_info["mcp_portability_warnings"]
+
+    if getattr(args, "json", False):
+        payload = {
+            "kit_healthy": kit_healthy,
+            "environment": env_info,
+            "project": str(project),
+            "health": health.to_dict(),
+        }
+        if repair_res is not None:
+            payload["repair"] = repair_res
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+        if not kit_healthy or not health.healthy:
+            sys.exit(1)
+        return
+
     print("\n🩺 AGENTS-KIT SYSTEM & ENVIRONMENT HEALTH CHECK")
     print("=" * 65)
 
-    tools = {
-        "Git": "git",
-        "Python 3": "python3",
-        "Node.js": "node",
-        "Context Mode CLI": "context-mode",
-        "Docker": "docker"
-    }
-    for name, cmd in tools.items():
-        loc = shutil.which(cmd)
+    for name, loc in env_info["tools"].items():
         status = f"✅ INSTALLED ({loc})" if loc else "⚠️ NOT FOUND (Optional/Recommended)"
         print(f"  • {name:<22}: {status}")
+
+    py_status = f"✅ {env_info['python_version']}"
+    yaml_status = "PyYAML" if env_info["pyyaml_installed"] else "Stdlib fallback (PyYAML not installed)"
+    print(f"  • Python Runtime        : {py_status} [{yaml_status}]")
 
     cli_path = shutil.which("agents-kit")
     expected_cli = KIT_DIR / "bin" / "agents-kit"
@@ -361,38 +396,31 @@ def cmd_doctor(args):
     )
     print(f"  • Agents-kit CLI on PATH : {cli_status}")
 
+    cat = env_info["catalog"]
     print("\n🔍 Internal Kit Integrity:")
-    registry = SkillRegistry(KIT_DIR)
-    registry.load_catalog()
-    skill_count = registry.get_total_count()
-    agent_count = len(list((AGENTS_DIR / "profiles").glob("*.agent.md")))
-    recipe_count = len(list((WORKFLOWS_DIR / "recipes").glob("*.md")))
-    template_count = len([t for t in (WORKFLOWS_DIR / "templates").iterdir() if t.is_file()])
-    ref_count = len(list((KIT_DIR / "references").glob("**/*.md")))
-    validation = registry.validate_registry()
+    print(f"  • Total Skills Available    : {cat['skills']} (skills.json: {cat['skills_json']})")
+    print(f"  • Agent Profile Files       : {cat['agents']}")
+    print(f"  • Workflow Recipes          : {cat['recipes']}")
+    print(f"  • Production Templates      : {cat['templates']}")
+    print(f"  • Reference Guides          : {cat['references']}")
+    print(f"  • Missing skill dependencies: {len(cat['missing_dependencies'])}")
+    print(f"  • Broken skill paths        : {len(cat['broken_paths'])}")
+    print(f"  • Circular dependencies     : {len(cat['circular_dependencies'])}")
+    if not cat["skills_json_synced"]:
+        print("  ⚠️ skills.json is out of sync with skills/ (run: agents-kit export-skills-json)")
+    for w in env_info["mcp_portability_warnings"]:
+        print(f"  ⚠️ {w}")
 
-    print(f"  • Total Skills Available    : {skill_count} (Expected: 290)")
-    print(f"  • Agent Profile Files      : {agent_count} (Expected: 22)")
-    print(f"  • Workflow Recipes         : {recipe_count} (Expected: 10)")
-    print(f"  • Production Templates     : {template_count} (Expected: 18)")
-    print(f"  • Reference Guides         : {ref_count} (Expected: 6)")
-    print(f"  • Missing skill dependencies: {len(validation.missing_dependencies)}")
-    print(f"  • Broken skill paths       : {len(validation.broken_paths)}")
-    print(f"  • Circular dependencies    : {len(validation.circular_dependencies)}")
+    if repair_res is not None:
+        prefix = "[DRY RUN] " if repair_res["dry_run"] else ""
+        print(f"\n🔧 {prefix}Repair summary: {len(repair_res['repaired_symlinks'])} symlink(s) fixed, {len(repair_res['unresolvable'])} unresolvable")
 
-    kit_healthy = (
-        skill_count >= 290 and agent_count >= 22 and recipe_count >= 10
-        and template_count >= 18 and ref_count >= 6
-        and not validation.missing_dependencies and not validation.broken_paths
-        and not validation.circular_dependencies
-    )
-
-    project = Path(args.project).expanduser().resolve()
-    health = inspect_project(project, KIT_DIR)
     print(f"\n📁 Project installation: {project}")
     print(f"  • Status                 : {health.status}")
+    print(f"  • Host                   : {health.host} (Detected configs: {', '.join(health.detected_hosts) or 'none'})")
     print(f"  • Skills                 : {health.active_skills} active, {len(health.broken_skills)} broken")
-    print(f"  • Project AGENTS.md      : {'PRESENT' if health.instructions_present else 'MISSING'}")
+    print(f"  • Context Budget Risk    : {health.context_budget_status} ({health.active_skills} active)")
+    print(f"  • Project Instructions   : {'PRESENT' if health.instructions_present else 'MISSING'}")
     for label, items in (
         ("BROKEN skill", health.broken_skills),
         ("MISSING managed skill", health.missing_skills),
@@ -414,37 +442,60 @@ def cmd_doctor(args):
         print("  • Next: inspect and back up the invalid .agents/agents-kit.manifest.json")
     elif health.status == "INCOMPLETE":
         print(f"  • Next: agents-kit audit {quoted_project}; manifest has no recorded skills")
-    elif health.broken_skills or health.missing_skills or health.missing_files or health.modified_files or health.invalid_paths:
+    elif health.broken_skills:
+        print(f"  • Next: agents-kit doctor --project {quoted_project} --fix")
+    elif health.missing_skills or health.missing_files or health.modified_files or health.invalid_paths:
         print(f"  • Next: agents-kit audit {quoted_project}; review files before repair")
 
-    global_rules = Path.home() / ".codex" / "AGENTS.md"
-    routing_configured = global_rules.is_file() and "Automatic Agent-kit routing" in global_rules.read_text(
-        encoding="utf-8", errors="ignore"
-    )
-    print(f"\nCodex global routing policy: {'PRESENT' if routing_configured else 'NOT DETECTED'}")
+    print(f"\nCodex global routing policy: {'PRESENT' if env_info['codex_global_routing'] else 'NOT DETECTED'}")
+    if env_info["antigravity_plugins"]:
+        print(f"Antigravity global plugins: {', '.join(env_info['antigravity_plugins'])}")
     print("Codex/MCP integration not checked (runtime invocation and handshake).")
     if not kit_healthy:
-        print("⚠️ Agents-kit status: Some components missing.")
+        print("⚠️ Agents-kit status: Some components need attention.")
     if not kit_healthy or not health.healthy:
         sys.exit(1)
 
 def cmd_setup_env(args):
-    bashrc = Path.home() / ".bashrc"
     bin_path = str(KIT_DIR / "bin")
     export_line = f'export PATH="{bin_path}:$PATH"'
 
-    if not bashrc.exists():
-        print(f"❌ Error: {bashrc} not found.")
+    if getattr(args, "symlink_bin", False):
+        local_bin = Path.home() / ".local" / "bin"
+        local_bin.mkdir(parents=True, exist_ok=True)
+        link_path = local_bin / "agents-kit"
+        if link_path.is_symlink() or link_path.exists():
+            link_path.unlink()
+        link_path.symlink_to(KIT_DIR / "bin" / "agents-kit")
+        print(f"✅ Symlinked CLI to {link_path}")
         return
 
-    content = bashrc.read_text(encoding="utf-8", errors="ignore")
-    if bin_path in content:
-        print(f"✅ Agents-kit binary path is already in {bashrc}!")
+    updated = []
+    for rc_name in (".bashrc", ".zshrc"):
+        rc = Path.home() / rc_name
+        if rc.exists():
+            content = rc.read_text(encoding="utf-8", errors="ignore")
+            if bin_path not in content:
+                with open(rc, "a", encoding="utf-8") as f:
+                    f.write(f"\n# Agents-kit CLI path\n{export_line}\n")
+                updated.append(rc_name)
+
+    if updated:
+        print(f"🎉 Added Agents-kit PATH to: {', '.join(updated)}")
+        print(f"💡 Restart your shell or run: source ~/{updated[0]}")
     else:
-        with open(bashrc, "a", encoding="utf-8") as f:
-            f.write(f"\n# Agents-kit CLI path\n{export_line}\n")
-        print(f"🎉 Successfully added Agents-kit to {bashrc}!")
-        print("💡 Run 'source ~/.bashrc' to use 'agents-kit' directly from anywhere!")
+        print("✅ Agents-kit PATH is already configured (or use --symlink-bin to link into ~/.local/bin).")
+
+def cmd_uninstall(args):
+    target = Path(args.target).resolve()
+    res = uninstall_managed(target, dry_run=getattr(args, "dry_run", False))
+    if not res["found"]:
+        print(f"⚠️ No agents-kit manifest found in {target}. Nothing removed.")
+        return
+    prefix = "[DRY RUN] " if getattr(args, "dry_run", False) else ""
+    print(f"🧹 {prefix}Uninstalled managed Agents-kit files from {target}:")
+    print(f"   • Skills removed : {res['removed_skills']}")
+    print(f"   • Files removed  : {res['removed_files']}")
 
 def cmd_search(args):
     router = SkillRouter(KIT_DIR)
@@ -521,7 +572,7 @@ def cmd_export_skills_json(args):
     manifest = {
         "$schema": "https://raw.githubusercontent.com/vercel-labs/skills/main/schema.json",
         "name": "agents-kit",
-        "version": "4.3.0",
+        "version": "4.4.0",
         "description": f"Universal multi-stack engineering suite with {len(skills_list)} production skills, 22 subagents, CLI tools, MCP servers, and workflows.",
         "author": "Hien",
         "repository": "https://github.com/hienpham0344/Agent-kit",
@@ -537,6 +588,7 @@ def cmd_add(args):
     import tempfile
     source = args.source.strip()
     target_project = Path(args.target).resolve()
+    skill_filter = getattr(args, "skill", "").strip()
 
     if source.startswith("https://") or source.startswith("git@"):
         clone_url = source
@@ -566,6 +618,8 @@ def cmd_add(args):
             if any(p in sm.parts for p in ("node_modules", ".git", ".venv")):
                 continue
             folder_name = sm.parent.name
+            if skill_filter and folder_name != skill_filter:
+                continue
             try:
                 safe_name = validate_skill_name(folder_name)
             except ValueError as e:
@@ -597,6 +651,9 @@ def main():
     subparsers.add_parser("list", help="List all curated skills, agents, and workflows")
     p_doc = subparsers.add_parser("doctor", help="Diagnose kit and project installation without changing files")
     p_doc.add_argument("--project", default=".", help="Project directory to inspect (default: current directory)")
+    p_doc.add_argument("--json", action="store_true", help="Output diagnostic report as JSON")
+    p_doc.add_argument("--fix", action="store_true", help="Safely repair broken skill symlinks")
+    p_doc.add_argument("--dry-run", action="store_true", help="Preview doctor --fix changes without touching disk")
 
     # install
     p_inst = subparsers.add_parser("install", help="Install skills and agents into target project")
@@ -638,7 +695,13 @@ def main():
     p_audit.add_argument("target", nargs="?", default=".", help="Target project root directory")
 
     # setup-env
-    subparsers.add_parser("setup-env", help="Add agents-kit to your ~/.bashrc for global CLI access")
+    p_env = subparsers.add_parser("setup-env", help="Configure PATH or symlink ~/.local/bin/agents-kit")
+    p_env.add_argument("--symlink-bin", action="store_true", help="Symlink agents-kit into ~/.local/bin/agents-kit")
+
+    # uninstall
+    p_uninst = subparsers.add_parser("uninstall", help="Safely remove Agents-kit managed files from a project")
+    p_uninst.add_argument("target", nargs="?", default=".", help="Target project root directory")
+    p_uninst.add_argument("--dry-run", action="store_true", help="Preview uninstall without removing files")
 
     # search
     p_search = subparsers.add_parser("search", help="Search skills and descriptions by keyword")
@@ -654,6 +717,7 @@ def main():
     p_mcp = subparsers.add_parser("mcp", help="Manage and verify MCP servers")
     p_mcp.add_argument("action", nargs="?", default="list", choices=["list", "doctor", "verify"], help="MCP action")
     p_mcp.add_argument("name", nargs="?", default="", help="Server name for verify")
+    p_mcp.add_argument("--json", action="store_true", help="Output MCP diagnostics as JSON")
 
     # test
     subparsers.add_parser("test", help="Run automated test suite")
@@ -688,6 +752,7 @@ def main():
         "agents": cmd_agents,
         "audit": cmd_audit,
         "setup-env": cmd_setup_env,
+        "uninstall": cmd_uninstall,
         "search": cmd_search,
         "create-skill": cmd_create_skill,
         "mcp": cmd_mcp,

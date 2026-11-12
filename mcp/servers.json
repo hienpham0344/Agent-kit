@@ -7,7 +7,7 @@
   },
   "filesystem": {
     "command": "npx",
-    "args": ["-y", "@modelcontextprotocol/server-filesystem", "/home/hien/Project"],
+    "args": ["-y", "@modelcontextprotocol/server-filesystem", "${WORKSPACE_ROOT}"],
     "description": "Secure scoped filesystem operations and file tree exploration.",
     "category": "core-io"
   },
